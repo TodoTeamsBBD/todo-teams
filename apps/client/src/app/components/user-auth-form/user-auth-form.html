@@ -1,0 +1,30 @@
+<div class="container">
+  <h2>{{ title }}</h2>
+  <p *ngIf="subtitle" class="subtitle">{{ subtitle }}</p>
+  <p *ngIf="description" class="description">{{ description }}</p>
+
+  <form class="form-input" [formGroup]="authForm" (ngSubmit)="onSubmit()">
+    <div *ngFor="let field of fields" class="form-group">
+      <label [for]="field.name">{{ field.label }}</label>
+      <input
+        [id]="field.name"
+        [formControlName]="field.name"
+        [type]="field.type || 'text'"
+        [placeholder]="field.placeholder || ''"
+        [class.error]="authForm.get(field.name)?.invalid && authForm.get(field.name)?.touched"
+      />
+      <div *ngIf="getFieldError(field.name)" class="error-message">
+        {{ getFieldError(field.name) }}
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn" [disabled]="authForm.invalid">
+      {{ buttonText }}
+    </button>
+  </form>
+
+  <p *ngIf="footerText" class="footer-text">
+    {{ footerText }}
+    <a *ngIf="footerLink && footerLinkText" [href]="footerLink">{{ footerLinkText }}</a>
+  </p>
+</div>
