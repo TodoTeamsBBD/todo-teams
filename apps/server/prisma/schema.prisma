@@ -40,8 +40,8 @@ model todos {
   id                             Int       @id
   title                          String    @db.VarChar(100)
   description                    String?   @db.VarChar(500)
-  created_by                     Int
-  assigned_to                    Int
+  created_by                     String    @db.Uuid
+  assigned_to                    String    @db.Uuid
   team_id                        Int
   created_at                     DateTime  @db.Timestamp(6)
   completed_at                   DateTime? @db.Timestamp(6)
@@ -52,7 +52,7 @@ model todos {
 
 model user_roles {
   id      Int    @id
-  user_id Int
+  user_id String @db.Uuid
   team_id Int?
   role_id Int
   roles   roles  @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -61,7 +61,7 @@ model user_roles {
 }
 
 model users {
-  id                             Int          @id
+  id                             String       @id @db.Uuid
   username                       String       @db.VarChar(30)
   email                          String       @unique @db.VarChar(254)
   password_hash                  String       @db.VarChar(255)
