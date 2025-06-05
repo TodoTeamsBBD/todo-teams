@@ -8,7 +8,7 @@ on:
 
 env:
   AWS_REGION: af-south-1
-  TF_WORKING_DIR: ./terraform  # Define your Terraform directory here
+  TF_WORKING_DIR: /terraform  # Define your Terraform directory here
 
 # Permission can be added at job level or workflow level    
 permissions:
