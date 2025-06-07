@@ -1,11 +1,24 @@
 import prisma from '../utils/prisma';
 
-export const getTeams = () => prisma.teams.findMany();
+export const getTeamById = (id: number) => prisma.teams.findUnique({ where: { id } });
 
-export const getTeam = (id: number) => prisma.teams.findUnique({ where: { id } });
+export const getTeamsPaginated = (page = 1, pageSize = 10) => prisma.teams.findMany({
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    orderBy: { id: 'asc'}
+});
 
-export const createTeam = (data: any) => prisma.teams.create({ data });
+export const getTeamsForUser = (userId: string) => prisma.user_roles.findMany({
+    where: {
+        user_id: userId,
+    },
+    include: {
+        teams: true,
+        roles: true,
+    }
+})
 
-export const updateTeam = (id: number, data: any) => prisma.teams.update({ where: { id }, data });
-
-export const deleteTeam = (id: number) => prisma.teams.delete({ where: { id } });
+export const createTeam = (teamName: string, createdAt: Date) => prisma.teams.create({ 
+    name: teamName, 
+    created_at: createdAt
+});
