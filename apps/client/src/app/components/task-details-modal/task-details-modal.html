@@ -1,0 +1,17 @@
+<section class="modal-backdrop" *ngIf="task">
+  <section class="modal">
+    <h2>Task Details</h2>
+    <p><strong>Title:</strong> {{ task.title }}</p>
+    <p><strong>Description:</strong> {{ task.description }}</p>
+    <p><strong>Assigned To:</strong> {{ task.assignedTo }}</p>
+    <p><strong>Created By:</strong> {{ task.createdBy }}</p>
+    <p><strong>Team ID:</strong> {{ task.teamId }}</p>
+    <p><strong>Created At:</strong> {{ task.createdAt | date: 'short' }}</p>
+    <p *ngIf="task.completedAt">
+      <strong>Completed At:</strong> {{ task.completedAt | date: 'short' }}
+    </p>
+    <section class="modal-actions">
+      <button class="close" (click)="close.emit()">Close</button>
+    </section>
+  </section>
+</section>

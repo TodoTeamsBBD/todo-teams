@@ -9,3 +9,8 @@ body, html {
   padding: 2rem;
   justify-content: center;
 }
+
+body.modal-open {
+  overflow: hidden;
+}
+
