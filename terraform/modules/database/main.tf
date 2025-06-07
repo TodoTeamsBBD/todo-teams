@@ -17,26 +17,26 @@ locals {
 }
 
 resource "aws_db_instance" "postgres" {
-  identifier           = "team8db"
+  identifier           = "team7db"
   allocated_storage    = 20 # Minimum storage for RDS
   storage_type         = "gp2" # General Purpose SSD (cheapest option)
   engine               = "postgres"
   engine_version       = "16.4" # Latest stable version
   instance_class       = "db.t3.micro" # Cheapest instance class (free tier eligible)
-  db_name              = "team8_db"
+  db_name              = "team7_db"
   username             = local.db_creds.username
   password             = local.db_creds.password # Change this to a secure password
   skip_final_snapshot  = true # For development/testing only
   publicly_accessible  = false # More secure default
   multi_az             = false # Disable for cheapest option
   backup_retention_period = 0 # Disable backups for cheapest option (not recommended for production)
-  deletion_protection  = true # Disable for easier cleanup (enable for production)
+  deletion_protection  = false # Disable for easier cleanup (enable for production)
   vpc_security_group_ids = [aws_security_group.db.id]
   db_subnet_group_name = aws_db_subnet_group.db.name
 }
 
 resource "aws_security_group" "db" {
-  name        = "team8-db-sg"
+  name        = "team7-db-sg"
   description = "Allow access to PostgreSQL"
   vpc_id      = var.vpc_id  # Attaches to your VPC
 
@@ -58,10 +58,17 @@ resource "aws_security_group" "db" {
 }
 
 resource "aws_db_subnet_group" "db" {
-  name       = "team8-db-subnet-group"
+  name       = "team7-db-subnet-group"
   subnet_ids = var.private_subnets
 
   tags = {
-    Name = "Team8 DB Subnet Group"
+    Name = "Team7 DB Subnet Group"
   }
+}
+output "db_security_group_id" {
+  value = aws_security_group.db.id
+}
+
+output "db_endpoint" {
+  value = aws_db_instance.postgres.endpoint
 }
