@@ -1,0 +1,22 @@
+<div class="container">
+  <h2>Create New Team</h2>
+  <form (ngSubmit)="createTeam()">
+  <input
+    matInput
+    required
+    class="search-input"
+    placeholder="Team name"
+    />
+
+  <div class="actions">
+    <button
+      mat-button
+      type="button"
+      (click)="close()"
+      class="btn btn-danger"
+      >Cancel</button>
+    <button mat-flat-button color="primary" type="submit" class="btn btn-primary">Create</button>
+  </div>
+</form>
+</div>
+

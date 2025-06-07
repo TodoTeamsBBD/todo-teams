@@ -1,0 +1,94 @@
+
+.team-list {
+  padding: 5rem;
+  height: 32rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.team-list h1 {
+  color: #333;
+  margin-bottom: 24px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+mat-list {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.team-item {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  padding: 16px !important;
+}
+
+.team-item:hover {
+  background-color: #f5f5f5;
+}
+
+.team-item:focus {
+  background-color: #e3f2fd;
+  outline: none;
+}
+
+.list-item-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.team-info {
+  flex: 1;
+}
+
+.team-name {
+  font-weight: 500;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.team-description {
+  color: #666;
+  font-size: 14px;
+}
+
+.team-role {
+  color: #2196F3;
+  font-weight: 500;
+  font-size: 14px;
+  background-color: #E3F2FD;
+  padding: 6px 12px;
+  border-radius: 12px;
+  text-align: center;
+  min-width: 80px;
+  margin-left: 16px;
+}
+
+mat-divider {
+  margin: 0 16px;
+}
+
+.fab-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 4rem;
+  z-index: 1000;
+}
+
+button[mat-fab] {
+  width: 56px;
+  height: 56px;
+  border-radius: 100%;
+  background-color: cadetblue;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: none;               /* <-- removes border */
+  outline: none;
+}

@@ -6,6 +6,11 @@ body, html {
 .auth-form {
   display: flex;
   flex: 1;
-  padding: 2rem;
   justify-content: center;
+  padding: 4rem;
 }
+
+body.modal-open {
+  overflow: hidden;
+}
+

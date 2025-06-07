@@ -1,6 +1,10 @@
-<!-- header.component.html -->
-<div class="header">
+<div class="header" *ngIf="showNavbar">
   <div class="container">
-        <span class="logo-text">To-Do</span>
+    <span class="logo-text">To-Do</span>
+    <!-- Example navbar links -->
+    <nav class="nav-links">
+      <a routerLink="/dashboard">Dashboard</a>
+      <a routerLink="/logout">Logout</a>
+    </nav>
   </div>
 </div>

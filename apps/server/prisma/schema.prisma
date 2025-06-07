@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PRISMA_DATABASE_URL")
+}
+
+model flyway_schema_history {
+  installed_rank Int      @id(map: "flyway_schema_history_pk")
+  version        String?  @db.VarChar(50)
+  description    String   @db.VarChar(200)
+  type           String   @db.VarChar(20)
+  script         String   @db.VarChar(1000)
+  checksum       Int?
+  installed_by   String   @db.VarChar(100)
+  installed_on   DateTime @default(now()) @db.Timestamp(6)
+  execution_time Int
+  success        Boolean
+
+  @@index([success], map: "flyway_schema_history_s_idx")
+}
+
+model roles {
+  id         Int          @id
+  name       String       @unique @db.VarChar(20)
+  user_roles user_roles[]
+}
+
+model teams {
+  id         Int          @id
+  name       String       @db.VarChar(50)
+  created_at DateTime     @db.Timestamp(6)
+  todos      todos[]
+  user_roles user_roles[]
+}
+
+model todos {
+  id                             Int       @id
+  title                          String    @db.VarChar(100)
+  description                    String?   @db.VarChar(500)
+  created_by                     Int
+  assigned_to                    Int
+  team_id                        Int
+  created_at                     DateTime  @db.Timestamp(6)
+  completed_at                   DateTime? @db.Timestamp(6)
+  users_todos_assigned_toTousers users     @relation("todos_assigned_toTousers", fields: [assigned_to], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_todos_created_byTousers  users     @relation("todos_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  teams                          teams     @relation(fields: [team_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user_roles {
+  id      Int    @id
+  user_id Int
+  team_id Int?
+  role_id Int
+  roles   roles  @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  teams   teams? @relation(fields: [team_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users   users  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id                             Int          @id
+  username                       String       @db.VarChar(30)
+  email                          String       @unique @db.VarChar(254)
+  password_hash                  String       @db.VarChar(255)
+  two_factor_secret              String       @db.VarChar(255)
+  created_at                     DateTime     @db.Timestamp(6)
+  todos_todos_assigned_toTousers todos[]      @relation("todos_assigned_toTousers")
+  todos_todos_created_byTousers  todos[]      @relation("todos_created_byTousers")
+  user_roles                     user_roles[]
+}
