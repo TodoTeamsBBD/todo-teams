@@ -11,7 +11,7 @@ export const getToDo = async (req: AuthenticatedRequest, res: Response) => {
 
   if (isNaN(id))
   {
-    return res.status(400).send('Todo id is required');
+    return res.status(400).send('Todo id must be a valid number');
   }
 
   const todo = await todoService.getTodoById(id);
@@ -29,6 +29,43 @@ export const getToDo = async (req: AuthenticatedRequest, res: Response) => {
   return res.status(200).json(todo);
 };
 
+export const getToDosForTeam = async (req: AuthenticatedRequest, res: Response) => {
+  const id = Number(req.params['id']);
+  const usersToDos = req.query['usersToDos'] === 'true';
+  const completedToDos = req.query['completedToDos'];
+  
+  let completed: boolean | null = null;
+
+  if (typeof completedToDos === 'string') {
+    if (completedToDos === 'true') {
+      completed = true;
+    } else if (completedToDos === 'false') {
+      completed = false;
+    }
+  }
+
+  if (isNaN(id))
+  {
+    return res.status(400).send('Team id must be a valid number');
+  }
+
+  const team = await teamService.getTeamById(id);
+  if (!team) {
+    return res.status(404).send('Team not found');
+  }
+
+  let userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamLead, team.id);
+  if (!userRole) {
+    userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamMember, team.id);
+    if (!userRole)
+      return res.status(403).send("Access denied: You do not have permission to perform this action." );
+  }
+
+  const todos = await todoService.getTodosOfTeam(team.id, usersToDos ? req.user.id : null, completed);
+
+  return res.status(200).json(todos);
+}
+
 export const create = async (req: AuthenticatedRequest, res: Response) => {
   const title = req.body?.title;
   const description = req.body?.description;
@@ -45,26 +82,26 @@ export const create = async (req: AuthenticatedRequest, res: Response) => {
   }
 
   const todoTeam = await teamService.getTeamById(teamId);
-  if (!assignedUser) {
+  if (!todoTeam) {
     return res.status(404).send("Team not found");
   }
 
-  let userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamLead, todoTeam.team_id);
+  let userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamLead, todoTeam.id);
   if (!userRole) {
-    userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamMember, todoTeam.team_id);
+    userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamMember, todoTeam.id);
     if (!userRole)
       return res.status(403).send("Access denied: You do not have permission to perform this action." );
   }
 
-  if (userRole.role == rolesEnum.TeamMember) {
-    if (userRole.userId != assignedUser.id) {
+  if (userRole.role_id == rolesEnum.TeamMember) {
+    if (userRole.user_id != assignedUser.id) {
       return res.status(403).send("You do not have permission to create a todo assigned to another member" );
     }
   }
   else {
-    let assignedUserRoleCheck = await userRoleService.findUserRoleIfExists(assignedUser.id, rolesEnum.TeamLead, todoTeam.team_id);
+    let assignedUserRoleCheck = await userRoleService.findUserRoleIfExists(assignedUser.id, rolesEnum.TeamLead, todoTeam.id);
     if (!assignedUserRoleCheck) {
-      assignedUserRoleCheck = await userRoleService.findUserRoleIfExists(assignedUser.id, rolesEnum.TeamMember, todoTeam.team_id);
+      assignedUserRoleCheck = await userRoleService.findUserRoleIfExists(assignedUser.id, rolesEnum.TeamMember, todoTeam.id);
       if (!assignedUserRoleCheck)
         return res.status(403).send("Cannot assign a task to a member not in the team" );
     }
@@ -97,8 +134,8 @@ export const update = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(403).send("Access denied: You do not have permission to perform this action." );
   }
 
-  if (userRole.role == rolesEnum.TeamMember) {
-    if (userRole.userId != todoToUpdate.user_id) {
+  if (userRole.role_id == rolesEnum.TeamMember) {
+    if (userRole.user_id != todoToUpdate.assigned_to) {
       return res.status(403).send("You do not have permission to update a todo assigned to another member" );
     }
 
@@ -109,6 +146,20 @@ export const update = async (req: AuthenticatedRequest, res: Response) => {
     }
   }
 
+  if (assignedTo) {
+    const assignedUser = await userService.getUserById(assignedTo);
+    if (!assignedUser) {
+      return res.status(404).send("User not found");
+    }
+
+    let assignedUserRoleCheck = await userRoleService.findUserRoleIfExists(assignedUser.id, rolesEnum.TeamLead, todoToUpdate.team_id);
+    if (!assignedUserRoleCheck) {
+      assignedUserRoleCheck = await userRoleService.findUserRoleIfExists(assignedUser.id, rolesEnum.TeamMember, todoToUpdate.team_id);
+      if (!assignedUserRoleCheck)
+        return res.status(403).send("Cannot assign a task to a member not in the team" );
+    }
+  }
+
   todoToUpdate.title = title ? title : todoToUpdate.title;
   todoToUpdate.description = description ? description : todoToUpdate.description;
   todoToUpdate.assigned_to = assignedTo ? assignedTo : todoToUpdate.assigned_to;
@@ -116,7 +167,7 @@ export const update = async (req: AuthenticatedRequest, res: Response) => {
     todoToUpdate.completed_at = completed ? new Date() : null;
   }
 
-  const updatedTodo = await todoService.updateTodo(id, todoToUpdate.title, todoToUpdate.description, todoToUpdate.assigned_to, todoToUpdate.completed_at);
+  const updatedTodo = await todoService.updateTodo(id, todoToUpdate.completed_at, todoToUpdate.title!, todoToUpdate.description!, todoToUpdate.assigned_to!);
   return res.status(200).json(updatedTodo);
 };
 
@@ -139,8 +190,8 @@ export const remove = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(403).send("Access denied: You do not have permission to perform this action." );
   }
 
-  if (userRole.role == rolesEnum.TeamMember) {
-    if (userRole.userId != todoToDelete.user_id) {
+  if (userRole.role_id == rolesEnum.TeamMember) {
+    if (userRole.user_id != todoToDelete.assigned_to) {
       return res.status(403).send("You do not have permission to delete a todo assigned to another member" );
     }
   }

@@ -18,7 +18,10 @@ export const getTeamsForUser = (userId: string) => prisma.user_roles.findMany({
     }
 })
 
-export const createTeam = (teamName: string, createdAt: Date) => prisma.teams.create({ 
-    name: teamName, 
-    created_at: createdAt
-});
+export const createTeam = (teamName: string, createdAt: Date) =>
+  prisma.teams.create({
+    data: {
+      name: teamName,
+      created_at: createdAt
+    }
+  });

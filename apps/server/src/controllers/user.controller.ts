@@ -3,8 +3,11 @@ import * as userService from '../services/user.service';
 
 export const getAllPaginated = async (req: Request, res: Response) => {
   const name = req.query['name'];
-  const page = Number(req.query['page']);
-  const pageSize = Number(req.query['pageSize']);
+  let page = Number(req.query['page']);
+  let pageSize = Number(req.query['pageSize']);
+
+  if (isNaN(page) || page < 1) page = 1;
+  if (isNaN(pageSize) || pageSize < 1) pageSize = 10;
 
   if (name && typeof name === 'string') {
     const users = await userService.searchUserByName(name, page, pageSize);

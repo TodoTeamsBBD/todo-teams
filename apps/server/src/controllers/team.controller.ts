@@ -5,10 +5,13 @@ import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 import { rolesEnum } from '../utils/rolesEnum';
 
 export const getAllPaginated = async (req: AuthenticatedRequest, res: Response) => {
-  const page = Number(req.query['page']);
-  const pageSize = Number(req.query['pageSize']);
+  let page = Number(req.query['page']);
+  let pageSize = Number(req.query['pageSize']);
 
-  const userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.AccessAdministrator);
+  if (isNaN(page) || page < 1) page = 1;
+  if (isNaN(pageSize) || pageSize < 1) pageSize = 10;
+
+  const userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.AccessAdministrator, null);
 
   if (!userRole) {
     return res.status(403).send("Access denied: You do not have permission to perform this action." );
@@ -19,7 +22,7 @@ export const getAllPaginated = async (req: AuthenticatedRequest, res: Response) 
 };
 
 export const getTeamsForUser = async (req: AuthenticatedRequest, res: Response) => {
-  const teams = await teamService.getTeamsForUser(req.user.userId);
+  const teams = await teamService.getTeamsForUser(req.user.id);
  
   res.status(200).json(teams);
 };

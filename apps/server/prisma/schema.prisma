@@ -23,13 +23,13 @@ model flyway_schema_history {
 }
 
 model roles {
-  id         Int          @id
+  id         Int          @id @default(autoincrement())
   name       String       @unique @db.VarChar(20)
   user_roles user_roles[]
 }
 
 model teams {
-  id         Int          @id
+  id         Int          @id @default(autoincrement())
   name       String       @db.VarChar(50)
   created_at DateTime     @db.Timestamp(6)
   todos      todos[]
@@ -37,7 +37,7 @@ model teams {
 }
 
 model todos {
-  id                             Int       @id
+  id                             Int       @id @default(autoincrement())
   title                          String    @db.VarChar(100)
   description                    String?   @db.VarChar(500)
   created_by                     String    @db.Uuid
@@ -51,7 +51,7 @@ model todos {
 }
 
 model user_roles {
-  id      Int    @id
+  id      Int    @id @default(autoincrement())
   user_id String @db.Uuid
   team_id Int?
   role_id Int
@@ -61,7 +61,7 @@ model user_roles {
 }
 
 model users {
-  id                             String       @id @db.Uuid
+  id                             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   username                       String       @db.VarChar(30)
   email                          String       @unique @db.VarChar(254)
   password_hash                  String       @db.VarChar(255)

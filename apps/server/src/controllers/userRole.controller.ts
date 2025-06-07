@@ -57,9 +57,9 @@ export const update = async (req: AuthenticatedRequest, res: Response) => {
     return res.status(400).send("Role not found")
   }
 
-  let userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamLead, userRoleToUpdate.teamId);
+  let userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamLead, userRoleToUpdate.team_id);
   if (!userRole) {
-    userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.AccessAdministrator);
+    userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.AccessAdministrator, null);
     if (!userRole)
       return res.status(403).send("Access denied: You do not have permission to perform this action." );
   }
@@ -80,9 +80,9 @@ export const remove = async (req: AuthenticatedRequest, res: Response) => {
     return res.status(400).send("User role not found")
   }
 
-  let userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamLead, userRoleToRemove.teamId);
+  let userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamLead, userRoleToRemove.team_id);
   if (!userRole) {
-    userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.AccessAdministrator);
+    userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.AccessAdministrator, null);
     if (!userRole)
       return res.status(403).send("Access denied: You do not have permission to perform this action." );
   }

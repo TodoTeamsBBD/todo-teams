@@ -18,7 +18,7 @@ export async function requireAuth(req: AuthenticatedRequest, res: Response, next
     if (!payload || !payload.userId) {
         return res.status(403).send('Invalid or expired token');
     }
-
+    
     const user = await getUserById(payload.userId);
     if (!user) {
         return res.status(404).send('User not found');
