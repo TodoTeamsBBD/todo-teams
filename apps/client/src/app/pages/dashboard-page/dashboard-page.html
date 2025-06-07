@@ -1,0 +1,23 @@
+<div class="team-list">
+  <h1>Your teams</h1>
+  <mat-list>
+      <ng-container *ngFor="let item of items; let last = last">
+        <mat-list-item (click)="onItemClick(item)" class="team-item">
+          <div class="list-item-wrapper">
+            <div class="team-info">
+              <div class="team-name">{{ item.name }}</div>
+              <div class="team-description">{{ item.description }}</div>
+            </div>
+            <div class="team-role">{{ item.role }}</div>
+          </div>
+        </mat-list-item>
+        <mat-divider *ngIf="!last"></mat-divider>
+    </ng-container>
+  </mat-list>
+</div>
+<div class="fab-container">
+  <button mat-fab color="primary" (click)="addTeam()">
+    <mat-icon >add</mat-icon>
+  </button>
+</div>
+
