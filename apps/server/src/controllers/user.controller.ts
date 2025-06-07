@@ -1,33 +1,21 @@
 import { Request, Response } from 'express';
 import * as userService from '../services/user.service';
 
-export const getAll = async (_: Request, res: Response) => {
-  const users = await userService.getUsers();
-  res.json(users);
-};
+export const getAllPaginated = async (req: Request, res: Response) => {
+  const name = req.query['name'];
+  let page = Number(req.query['page']);
+  let pageSize = Number(req.query['pageSize']);
 
-export const getOne = async (req: Request, res: Response) => {
-  const id = Number(req.params['id']);
-  const user = await userService.getUser(id);
-  if (!user) 
-    res.status(404).send('User not found');
-  else
-    res.json(user);
-};
+  if (isNaN(page) || page < 1) page = 1;
+  if (isNaN(pageSize) || pageSize < 1) pageSize = 10;
 
-export const create = async (req: Request, res: Response) => {
-  const user = await userService.createUser(req.body);
-  res.status(201).json(user);
-};
+  if (name && typeof name === 'string') {
+    const users = await userService.searchUserByName(name, page, pageSize);
+    return res.json(users);
+  }
+  else {
+    const users = await userService.getUsersPaginated(page, pageSize);
 
-export const update = async (req: Request, res: Response) => {
-  const id = Number(req.params['id']);
-  const updatedUser = await userService.updateUser(id, req.body);
-  res.json(updatedUser);
-};
-
-export const remove = async (req: Request, res: Response) => {
-  const id = Number(req.params['id']);
-  await userService.deleteUser(id);
-  res.status(204).send();
+    return res.json(users);
+  }
 };
