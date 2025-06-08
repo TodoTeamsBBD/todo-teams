@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import * as userRoleController from '../controllers/userRole.controller';
+import { requireAuth } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-router.get('/', userRoleController.getAll);
-router.get('/:id', userRoleController.getOne);
-router.post('/', userRoleController.create);
-router.put('/:id', userRoleController.update);
-router.delete('/:id', userRoleController.remove);
+router.post('/', requireAuth, userRoleController.create);
+router.put('/:id', requireAuth, userRoleController.update);
+router.delete('/:id', requireAuth, userRoleController.remove);
 
 export default router;
