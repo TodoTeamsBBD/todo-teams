@@ -7,7 +7,7 @@ package-lock.json
 # .tfstate files
 *.tfstate
 *.tfstate.*
-
+**dist
 # Crash log files
 crash.log
 

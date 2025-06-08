@@ -1,78 +1,61 @@
-# EC2 Instance for Node.js app
-variable "vpc_id" {
-  description = "The ID of the VPC"
-  type        = string
+data "aws_region" "current" {}
+
+data "aws_iam_policy_document" "angular_s3_policy" {
+  statement {
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.angular_app.arn}/*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = [aws_cloudfront_origin_access_identity.angular_oai.iam_arn]
+    }
+  }
 }
 
-variable "public_subnets" {
-  description = "List of private subnet IDs"
-  type        = list(string)
-}
-
-variable "db_security_group" {
-  
-}
-
-resource "aws_instance" "app_server" {
-  ami           = "ami-0c55b159cbfafe1f0" # Amazon Linux 2
-  instance_type = "t2.micro"
-  subnet_id     = var.public_subnets[0]
-  vpc_security_group_ids = [aws_security_group.app.id]
-
-  user_data = <<-EOF
-              #!/bin/bash
-              curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
-              sudo yum install -y nodejs
-              npm install -g pm2
-              # Your app setup code here
-              EOF
-
+# Create S3 bucket for Angular files
+resource "aws_s3_bucket" "angular_app" {
+  bucket = "team7-todo-app" # Change to a unique name
   tags = {
-    Name = "nodejs-app-server"
+    Project = "Team7 Todo"
   }
 }
 
-# Security Group for EC2
-resource "aws_security_group" "app" {
-  name   = "app-server-sg"
-  vpc_id = var.vpc_id
+resource "aws_s3_bucket_public_access_block" "angular_app" {
+  bucket = aws_s3_bucket.angular_app.id
 
-  # Allow HTTP from CloudFront
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Open to world (CloudFront will protect it)
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_website_configuration" "angular_app" {
+  bucket = aws_s3_bucket.angular_app.id
+
+  index_document {
+    suffix = "index.html"
   }
 
-  # Allow outbound to database
-  egress {
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [var.db_security_group]
-  }
-
-  # Allow all outbound (for npm installs, etc)
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  error_document {
+    key = "index.html"
   }
 }
 
-# CloudFront Distribution
-resource "aws_cloudfront_distribution" "app" {
+resource "aws_s3_bucket_ownership_controls" "angular_app" {
+  bucket = aws_s3_bucket.angular_app.id
+  rule {
+    object_ownership = "BucketOwnerEnforced" # Recommended for security
+  }
+}
+
+# CloudFront distribution for S3
+resource "aws_cloudfront_distribution" "angular_distribution" {
   origin {
-    domain_name = aws_instance.app_server.public_ip
-    origin_id   = "ec2-origin"
+    domain_name = aws_s3_bucket.angular_app.bucket_regional_domain_name
+    origin_id   = "S3-angular-app"
 
-    custom_origin_config {
-      http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = "http-only" # EC2 has no HTTPS
-      origin_ssl_protocols   = ["TLSv1.2"]
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.angular_oai.cloudfront_access_identity_path
     }
   }
 
@@ -80,22 +63,18 @@ resource "aws_cloudfront_distribution" "app" {
   default_root_object = "index.html"
 
   default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "ec2-origin"
+    target_origin_id = "S3-angular-app"
 
     forwarded_values {
-      query_string = true
-      headers      = ["*"]
+      query_string = false
       cookies {
-        forward = "all"
+        forward = "none"
       }
     }
 
     viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
   }
 
   restrictions {
@@ -105,10 +84,31 @@ resource "aws_cloudfront_distribution" "app" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true # Use CloudFront's default SSL cert
+    cloudfront_default_certificate = true
+  }
+
+  tags = {
+    Project = "Team7 ToDo"
   }
 }
 
+# Allow CloudFront to access S3 (security)
+resource "aws_cloudfront_origin_access_identity" "angular_oai" {
+  comment = "OAI for Team7 Angular app"
+}
+
+# S3 Bucket Policy (only allow CloudFront)
+resource "aws_s3_bucket_policy" "angular_bucket_policy" {
+  bucket = aws_s3_bucket.angular_app.id
+  policy = data.aws_iam_policy_document.angular_s3_policy.json
+}
+
+
+
 output "cloudfront_url" {
-  value = "https://${aws_cloudfront_distribution.app.domain_name}"
+  value = "https://${aws_cloudfront_distribution.angular_distribution.domain_name}"
+}
+
+output "s3_website_url" {
+  value = "http://${aws_s3_bucket.angular_app.bucket}.s3-website-${data.aws_region.current.name}.amazonaws.com"
 }
