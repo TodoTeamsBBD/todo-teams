@@ -10,7 +10,7 @@ on:
 env:
   AWS_REGION: af-south-1
   S3_BUCKET: team7-todo-app
-  CF_DIST_ID: YOUR_CLOUDFRONT_DISTRIBUTION_ID  # Replace this with your actual ID
+  CF_DIST_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} 
 
 permissions:
   id-token: write
