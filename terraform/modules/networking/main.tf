@@ -22,6 +22,12 @@ resource "aws_subnet" "private_db_b" {
   cidr_block        = "10.0.2.0/24" 
   availability_zone = "af-south-1b"
 }
+
+resource "aws_subnet" "private_api_a" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.3.0/24" # New CIDR
+  availability_zone = "af-south-1c" # Same AZ as private_db_a
+}
 output "vpc_id" {
   value = aws_vpc.main.id
 }
@@ -32,6 +38,9 @@ output "public_subnet_id" {
 
 output "private_db_a_id" {
   value = aws_subnet.private_db_a.id
+}
+output "private_api_id" {
+  value = aws_subnet.private_api_a.id
 }
 
 output "private_db_b_id" {

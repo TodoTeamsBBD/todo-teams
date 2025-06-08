@@ -7,7 +7,15 @@ variable "private_subnets" {
   description = "List of private subnet IDs"
   type        = list(string)
 }
+variable "api_security_group_id" {
+  description = "API security group ID"
+  type = string
+}
 
+variable "db_security_group_id" {
+  description = "Database security group ID"
+  type = string
+}
 data "aws_secretsmanager_secret_version" "db_creds" {
   secret_id = "prod/todo/postgress"
 }
@@ -31,30 +39,8 @@ resource "aws_db_instance" "postgres" {
   multi_az             = false # Disable for cheapest option
   backup_retention_period = 0 # Disable backups for cheapest option (not recommended for production)
   deletion_protection  = false # Disable for easier cleanup (enable for production)
-  vpc_security_group_ids = [aws_security_group.db.id]
+  vpc_security_group_ids = [var.db_security_group_id]
   db_subnet_group_name = aws_db_subnet_group.db.name
-}
-
-resource "aws_security_group" "db" {
-  name        = "team7-db-sg"
-  description = "Allow access to PostgreSQL"
-  vpc_id      = var.vpc_id  # Attaches to your VPC
-
-  # Rule: Allow inbound PostgreSQL traffic (port 5432) ONLY from your API/application servers
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]  # Restrict to your VPC (or narrower range)
-  }
-
-  # Rule: Allow all outbound traffic
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
 resource "aws_db_subnet_group" "db" {
@@ -64,9 +50,6 @@ resource "aws_db_subnet_group" "db" {
   tags = {
     Name = "Team7 DB Subnet Group"
   }
-}
-output "db_security_group_id" {
-  value = aws_security_group.db.id
 }
 
 output "db_endpoint" {
