@@ -2,7 +2,6 @@ resource "aws_s3_bucket" "tf_backend" {
   bucket = "team7-terraform-state"
 
   lifecycle {
-    prevent_destroy = true
   }
 }
 
