@@ -16,12 +16,20 @@ export async function requireAuth(req: AuthenticatedRequest, res: Response, next
     
     const payload = verifyJwt(token);
     if (!payload || !payload.userId) {
-        return res.status(403).send('Invalid or expired token');
+        return res.status(401).send('Invalid or expired token. Please login again');
     }
     
     const user = await getUserById(payload.userId);
     if (!user) {
         return res.status(404).send('User not found');
+    }
+
+    if (!user.two_factor_verified) {
+      return res.status(403).send("Access denied: Two factor authentication not enabled");
+    }
+
+    if (!payload.is2FAverifiedSession) {
+      return res.status(403).send("Access denied: Two factor authentication on login not completed")
     }
 
     req.user = user;
