@@ -60,6 +60,7 @@ jobs:
               cd /var/www/api &&
               git pull &&
               npm install &&
+              npm run build &&
               pm2 restart all
             ' \
             --output text \

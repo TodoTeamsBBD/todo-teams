@@ -21,6 +21,9 @@ module "web_app" {
 
 module "api" {
   source = "./modules/api"
+  vpc_id = module.networking.vpc_id
+  alb_security_group_id = module.security_groups.alb_security_group_id
+  public_subnets = [module.networking.public_subnet_id, module.networking.public_subnet_b_id]
   private_subnet = module.networking.private_api_id
   db_security_group_id = module.security_groups.db_security_group_id
   api_security_group_id = module.security_groups.api_security_group_id

@@ -17,7 +17,3 @@ variable "environment" {
   type        = string
   default     = "prod"
 }
-
-variable "api_security_group" {
-  
-}
