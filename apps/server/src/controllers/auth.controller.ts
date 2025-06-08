@@ -59,7 +59,7 @@ export const signup2FA = async (req: Request, res: Response) => {
     
     const payload = verifyJwt(token);
     if (!payload || !payload.userId) {
-        return res.status(403).send('Invalid or expired authentication token');
+        return res.status(401).send('Invalid or expired authentication token');
     }
     
     let user = await userService.getUserById(payload.userId);
@@ -97,6 +97,39 @@ export const signup2FA = async (req: Request, res: Response) => {
         userId: user.id, 
         name: user.username
     });
+}
+
+export const getQR = async (req: Request, res: Response) => {
+    let token = req.cookies['access_token'];
+
+    if (!token) {
+        return res.status(401).send('Authentication token missing');
+    }
+    
+    const payload = verifyJwt(token);
+    if (!payload || !payload.userId) {
+        return res.status(401).send('Invalid or expired authentication token');
+    }
+    
+    let user = await userService.getUserById(payload.userId);
+    if (!user) {
+        return res.status(404).send('User not found');
+    }
+
+    if (user.two_factor_verified) {
+        return res.status(403).send("Two factor authentication has already been enabled");
+    }
+
+    const otpauthUrl = speakeasy.otpauthURL({
+        secret: user.two_factor_secret,
+        label: `TodoTeams (${user.email})`,
+        issuer: `TodoTeams`,
+        encoding: 'base32',
+    });
+
+    const qr = await QRCode.toDataURL(otpauthUrl);
+
+    return res.status(200).json({ qrCodeUrl: qr });
 }
 
 export const login = async (req: Request, res: Response) => {
@@ -160,7 +193,7 @@ export const login2FA = async (req: Request, res: Response) => {
     
     const payload = verifyJwt(token);
     if (!payload || !payload.userId) {
-        return res.status(403).send('Invalid or expired authentication token');
+        return res.status(401).send('Invalid or expired authentication token');
     }
     
     let user = await userService.getUserById(payload.userId);
