@@ -1,0 +1,11 @@
+<div class="auth-form">
+  <app-user-auth-form
+    title="Sign Up!"
+    buttonText="Sign In"
+    [fields]="loginFields"
+    footerText="Already have an account?"
+    footerLink="/login"
+    footerLinkText="Log In"
+    (formSubmit)="onLogin($event)">
+  </app-user-auth-form>
+</div>

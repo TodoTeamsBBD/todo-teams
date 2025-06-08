@@ -1,0 +1,67 @@
+name: Deploy API (Express)
+
+on:
+  push:
+    paths:
+      - 'apps/server/**'
+      - '.github/workflows/deploy-api.yml'
+    branches: [ main ]
+
+env:
+  AWS_REGION: af-south-1
+  EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}  # Replace with your EC2 instance ID
+  API_ZIP: api-deploy.zip
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-api:
+    name: Build & Deploy Express API
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/server
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.7.0
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
+          role-session-name: deploy-api
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Zip API
+        run: |
+          zip -r ${{ env.API_ZIP }} .
+        working-directory: apps/server
+
+      - name: Send deploy command via SSM
+        run: |
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --instance-ids ${{ env.EC2_INSTANCE_ID }} \
+            --region ${{ env.AWS_REGION }} \
+            --comment "Deploy API" \
+            --parameters commands='
+              cd /var/www/api &&
+              git pull &&
+              npm install &&
+              npm run build &&
+              pm2 restart all
+            ' \
+            --output text \
+            --query "Command.CommandId"

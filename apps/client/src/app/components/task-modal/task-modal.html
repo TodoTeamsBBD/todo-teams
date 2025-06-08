@@ -1,0 +1,40 @@
+<section class="modal-backdrop" *ngIf="show">
+  <section class="modal">
+    <h2>{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h2>
+    <p *ngIf="!isEditMode">Fill in the details of the new task.</p>
+
+    <mat-form-field style="width: 100%">
+      <mat-label>Task Title</mat-label>
+      <input matInput [(ngModel)]="task.title" placeholder="Enter task title" />
+    </mat-form-field>
+
+    <mat-form-field style="width: 100%">
+      <mat-label>Task Description</mat-label>
+      <textarea
+        matInput
+        [(ngModel)]="task.description"
+        placeholder="Enter task description"
+        rows="4"
+      ></textarea>
+    </mat-form-field>
+
+    <mat-form-field style="width: 100%">
+      <mat-label>Assign To</mat-label>
+      <mat-select
+        [(ngModel)]="task.assignedTo"
+        panelClass="custom-select-panel"
+      >
+        <mat-option *ngFor="let member of teamMembers" [value]="member">
+          {{ member }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <section class="modal-actions">
+      <button class="cancel" (click)="onClose()">Cancel</button>
+      <button class="create" (click)="onSave()">
+        {{ isEditMode ? 'Update Task' : 'Create Task' }}
+      </button>
+    </section>
+  </section>
+</section>
