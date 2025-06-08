@@ -53,10 +53,6 @@ export const signup2FA = async (req: Request, res: Response) => {
     let token = req.cookies['access_token'];
     const code2FA = req.body?.code2FA;
 
-    if (isNaN(code2FA)) {
-        return res.status(400).send("2FA code is required");
-    }
-
     if (!token) {
         return res.status(401).send('Authentication token missing');
     }
@@ -122,15 +118,6 @@ export const login = async (req: Request, res: Response) => {
     }
 
     if (!user.two_factor_verified) {
-        const otpauthUrl = speakeasy.otpauthURL({
-            secret: user.two_factor_secret,
-            label: `TodoTeams (${email})`,
-            issuer: `TodoTeams`,
-            encoding: 'base32',
-        });
-
-        const qr = await QRCode.toDataURL(otpauthUrl);
-        
         const token = signJwt({ userId: user.id, name: user.username, is2FAverified: false, is2FAverifiedSession: false});
 
         res.cookie('access_token', token, {
@@ -143,8 +130,7 @@ export const login = async (req: Request, res: Response) => {
         return res.status(201).json({ 
             message: 'User verified. Two factor authentication must be enabled to continue', 
             userId: user.id, 
-            name: user.username,
-            qrCodeUrl: qr
+            name: user.username
         });
     }
 
@@ -167,10 +153,6 @@ export const login = async (req: Request, res: Response) => {
 export const login2FA = async (req: Request, res: Response) => {
     let token = req.cookies['access_token'];
     const code2FA = req.body?.code2FA;
-
-    if (isNaN(code2FA)) {
-        return res.status(400).send("2FA code is required");
-    }
 
     if (!token) {
         return res.status(401).send('Authentication token missing');
