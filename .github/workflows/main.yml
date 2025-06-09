@@ -47,7 +47,7 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
         working-directory: ${{ env.TF_WORKING_DIR }}
-
+        
       # Apply Terraform changes (only on main branch pushes)
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
