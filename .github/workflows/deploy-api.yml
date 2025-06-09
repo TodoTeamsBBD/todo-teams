@@ -2,9 +2,6 @@ name: Deploy API (Express)
 
 on:
   workflow_run:
-    workflows: ["Terraform"]
-    types:
-      - completed
 
 jobs:
   deploy:
@@ -27,7 +24,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           
           # Copy files to EC2
-          scp -o StrictHostKeyChecking=no -r apps/server/{package.json,package-lock.json,dist, prisma} ec2-user@${{ secrets.EC2_HOST }}:/var/www/api/
+          scp -o StrictHostKeyChecking=no -r apps/server/{package.json,package-lock.json,dist,prisma} ec2-user@${{ secrets.EC2_HOST }}:/var/www/api/
           
           # SSH commands to restart the app
           ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << 'ENDSSH'
