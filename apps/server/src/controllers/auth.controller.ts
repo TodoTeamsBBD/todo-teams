@@ -31,8 +31,6 @@ export const signup = async (req: Request, res: Response) => {
 
     const token = signJwt({ userId: user.id, name: user.username, is2FAverified: false, is2FAverifiedSession: false});
 
-    const otpauth_url = secret2FA.otpauth_url!;
-    const qr = await QRCode.toDataURL(otpauth_url);
 
     res.cookie('access_token', token, {
         httpOnly: true,
@@ -45,7 +43,6 @@ export const signup = async (req: Request, res: Response) => {
         message: 'User signed up successfully. Proceed to 2FA', 
         userId: user.id, 
         name: user.username,
-        qrCodeUrl: qr
     });
 };
 
