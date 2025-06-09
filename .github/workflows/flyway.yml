@@ -49,7 +49,7 @@ jobs:
 
       - name: Prepare Flyway Files
         run: |
-          mkdir -p flyway/tmp
+          mkdir -p flyway/tmp/
           cp flyway/*.sql flyway/tmp/
           
           # Generate flyway.conf with actual credentials
@@ -74,7 +74,7 @@ jobs:
             chmod 755 /opt/flyway
           "
           
-          scp -o StrictHostKeyChecking=no -r flyway/tmp/* ec2-user@$EC2_HOST:/opt/flyway/
+          scp -o StrictHostKeyChecking=no -r flyway/tmp/* ec2-user@$EC2_HOST:/opt/flyway/sql
 
           ssh -o StrictHostKeyChecking=no ec2-user@$EC2_HOST << 'ENDSSH'
           cd /opt/flyway
