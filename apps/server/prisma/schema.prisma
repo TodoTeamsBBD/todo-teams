@@ -67,6 +67,7 @@ model users {
   password_hash                  String       @db.VarChar(255)
   two_factor_secret              String       @db.VarChar(255)
   created_at                     DateTime     @db.Timestamp(6)
+  two_factor_verified            Boolean      @default(false)
   todos_todos_assigned_toTousers todos[]      @relation("todos_assigned_toTousers")
   todos_todos_created_byTousers  todos[]      @relation("todos_created_byTousers")
   user_roles                     user_roles[]

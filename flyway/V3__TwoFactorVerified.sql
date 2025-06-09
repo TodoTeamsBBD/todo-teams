@@ -1,0 +1,2 @@
+ALTER TABLE users
+ADD COLUMN two_factor_verified BOOLEAN NOT NULL DEFAULT FALSE;

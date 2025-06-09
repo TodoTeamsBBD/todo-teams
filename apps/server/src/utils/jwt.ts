@@ -6,6 +6,8 @@ const ACCESS_TOKEN_EXPIRES_IN = '30m';
 export interface JwtPayload {
   userId: string;
   name: string;
+  is2FAverified: boolean;
+  is2FAverifiedSession: boolean;
 }
 
 export function signJwt(payload: JwtPayload): string {
