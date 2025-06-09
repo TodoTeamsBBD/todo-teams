@@ -33,11 +33,11 @@ jobs:
 
       - name: Get Database Credentials
         id: get-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
-          secrets: |
+          secret-ids: |
             prod/todo/postgress
-          parse-json: true
+          parse-json-secrets: true
 
       - name: Install Flyway
         run: |
