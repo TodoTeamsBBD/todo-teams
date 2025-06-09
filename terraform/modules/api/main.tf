@@ -87,10 +87,16 @@ resource "aws_lb_listener" "http" {
   }
 }
 
+resource "aws_iam_instance_profile" "github_action_instance_profile" {
+  name = "GitHubAction-AssumeRoleWithAction"
+  role = "GitHubAction-AssumeRoleWithAction"  # your existing role name
+}
+
 resource "aws_instance" "api" {
   ami           = data.aws_ami.amazon_linux.id
   instance_type = "t3.micro"
   subnet_id     = var.private_subnet   # Private subnet
+  iam_instance_profile = aws_iam_instance_profile.github_action_instance_profile.name
   vpc_security_group_ids = [var.api_security_group_id]
   user_data     = <<-EOF
                   #!/bin/bash
