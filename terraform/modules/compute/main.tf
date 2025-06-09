@@ -65,7 +65,7 @@ resource "aws_instance" "express_ec2" {
   ami                         = "ami-0722f955ef0cb4675" # Amazon Linux 2 in us-east-1
   instance_type               = "t3.micro"
   subnet_id                   = data.aws_subnets.default.ids[0]
-  security_groups             = [aws_security_group.express_sg.id]
+  security_groups             = [aws_security_group.express_sg.name]
   key_name                    = "team7-ec2" # Replace with your actual EC2 key pair name
   associate_public_ip_address = true
 
@@ -96,10 +96,9 @@ resource "aws_instance" "express_ec2" {
           NODE_ENV: "production",
           PORT: 3000,
           DB_HOST: "localhost",
-          DB_PORT: 5432
-          DB_USERNAME: ${local.db_creds.username}
-          DB_PASSWORD: ${local.db_creds.password}
-
+          DB_PORT: 5432,
+          DB_USERNAME: '${local.db_creds.username}',
+          DB_PASSWORD: '${local.db_creds.password}'
         },
         error_file: "/var/log/node-api.err.log",
         out_file: "/var/log/node-api.out.log",
