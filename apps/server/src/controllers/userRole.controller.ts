@@ -118,5 +118,10 @@ export const remove = async (req: AuthenticatedRequest, res: Response) => {
   }
 
   await userRoleService.deleteUserRole(userRoleToRemove.id);
+
+  if(await userRoleService.getTeamCount(userRoleToRemove.team_id!) < 1) {
+    await teamService.deleteTeam(userRoleToRemove.team_id!);
+  }
+
   return res.status(204).send();
 };
