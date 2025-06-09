@@ -72,8 +72,10 @@ jobs:
 
           ssh -o StrictHostKeyChecking=no ec2-user@$EC2_HOST << 'ENDSSH'
           FLYWAY_VERSION=9.22.3
-          wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/$FLYWAY_VERSION/flyway-commandline-$FLYWAY_VERSION-linux-x64.tar.gz | tar xvz
-          sudo mv flyway-$FLYWAY_VERSION /opt/flyway
+          if [ ! -d "/opt/flyway/flyway-$FLYWAY_VERSION" ]; then
+            wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/$FLYWAY_VERSION/flyway-commandline-$FLYWAY_VERSION-linux-x64.tar.gz | tar xvz
+            sudo mv flyway-$FLYWAY_VERSION /opt/flyway
+          fi
           cd /opt/flyway
           /opt/flyway/flyway-$FLYWAY_VERSION/flyway migrate -configFiles=/opt/flyway/flyway.conf
           /opt/flyway/flyway-$FLYWAY_VERSION/flyway info -configFiles=/opt/flyway/flyway.conf
