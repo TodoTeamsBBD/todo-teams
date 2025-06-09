@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { FormField, UserAuthForm } from '../../components/user-auth-form/user-auth-form';
 
 @Component({
@@ -8,7 +10,10 @@ import { FormField, UserAuthForm } from '../../components/user-auth-form/user-au
   styleUrl: './sign-up-page.css'
 })
 export class SignUpPage {
-  loginFields: FormField[] = [
+  private http = inject(HttpClient);
+  private router = inject(Router);
+
+  signupFields: FormField[] = [
       {
         name: 'email',
         label: 'Email',
@@ -32,10 +37,48 @@ export class SignUpPage {
       }
     ];
 
-    onLogin(formData: any) {
-      console.log('Login data:', formData);
-      // Handle your login logic here
-      // Example: call your authentication service
-      // this.authService.login(formData.email, formData.password);
-    }
+  isLoading = false;
+  errorMessage = '';
+
+  onSignup(formData: any) {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    const signupData = {
+      name: formData.fullname,
+      email: formData.email,
+      password: formData.password
+    };
+
+    this.http.post('http://localhost:3000/auth/signup', signupData, {
+      withCredentials: true
+    }).subscribe({
+      next: (response: any) => {
+        console.log('Signup successful:', response);
+
+        this.router.navigate(['/signup-2fa'], {
+          state: {
+            qrCodeUrl: response.qrCodeUrl,
+            userId: response.userId,
+            name: response.name
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Signup error:', error);
+        this.isLoading = false;
+
+        if (error.status === 409) {
+          this.errorMessage = 'Email already exists. Please use a different email.';
+        } else if (error.status === 400) {
+          this.errorMessage = 'Please fill in all required fields.';
+        } else {
+          this.errorMessage = 'An error occurred during signup. Please try again.';
+        }
+      },
+      complete: () => {
+        this.isLoading = false;
+      }
+    });
+  }
 }
