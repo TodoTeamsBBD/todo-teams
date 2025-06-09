@@ -17,7 +17,7 @@ export class Header {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
-      const hiddenRoutes = ['/login', '/signup'];
+      const hiddenRoutes = ['/login', '/signup', '/signup-2fa'];
       this.showNavbar = !hiddenRoutes.includes(event.urlAfterRedirects);
     });
   }

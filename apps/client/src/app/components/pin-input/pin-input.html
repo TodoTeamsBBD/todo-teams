@@ -1,0 +1,22 @@
+<div class="pin-input-container">
+  <div class="pin-header">
+    <h3>Enter Verification Code</h3>
+    <p class="subtitle">Enter the 6-digit code from Microsoft Authenticator</p>
+  </div>
+      <input
+        #pinInput
+        type="text"
+        class="pin-input"
+        [class.error]="hasError"
+        [maxlength]="length"
+        [(ngModel)]="pinValue"
+        (input)="onInput($event)"
+        (keydown)="onKeyDown($event)"
+        [placeholder]="placeholder"
+        autocomplete="off"
+        inputmode="numeric"
+      />
+      <div *ngIf="hasError && errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+    </div>

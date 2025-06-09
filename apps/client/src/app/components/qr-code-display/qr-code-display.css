@@ -1,0 +1,35 @@
+
+    .qr-code-container {
+      text-align: center;
+      padding: 24px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e5e7eb;
+    }
+
+    .qr-header h3 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .subtitle {
+      margin: 0 0 24px 0;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .qr-code-wrapper {
+      margin: 24px 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .qr-code-image {
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+    }
+

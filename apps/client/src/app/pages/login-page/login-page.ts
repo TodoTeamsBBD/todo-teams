@@ -27,8 +27,6 @@ export class LoginPage {
 
   onLogin(formData: any) {
     console.log('Login data:', formData);
-    // Handle your login logic here
-    // Example: call your authentication service
-    // this.authService.login(formData.email, formData.password);
+
   }
 }

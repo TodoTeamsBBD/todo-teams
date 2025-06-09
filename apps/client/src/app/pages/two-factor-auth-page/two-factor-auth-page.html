@@ -1,0 +1,37 @@
+<div class="setup-container">
+      <div class="setup-header">
+        <h1>Enable Two-Factor Authentication</h1>
+        <p class="header-subtitle">Secure your account with Microsoft Authenticator</p>
+      </div>
+
+      <div class="setup-content">
+        <div class="step-indicator">
+          <div class="step" [class.active]="currentStep >= 1">
+            <div class="step-number">1</div>
+            <span>Scan QR Code</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" [class.active]="currentStep >= 2">
+            <div class="step-number">2</div>
+            <span>Verify Setup</span>
+          </div>
+        </div>
+
+        <div class="components-wrapper">
+          <app-qr-code-display
+            [qrCodeUrl]="qrCodeUrl"
+            [backupCode]="backupCode"
+            title="Step 1: Scan QR Code"
+            subtitle="Open Microsoft Authenticator and scan this code"
+          ></app-qr-code-display>
+
+          <app-pin-input
+            [hasError]="verificationError"
+            title="Step 2: Enter Verification Code"
+            subtitle="Enter the 6-digit code from Microsoft Authenticator"
+            (pinComplete)="verifyPin($event)"
+          ></app-pin-input>
+        </div>
+      </div>
+    </div>
+
