@@ -63,11 +63,19 @@ jobs:
 
       - name: Copy Files to EC2
         run: |
+          # Set up SSH key
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          ssh ec2-user@$EC2_HOST "
+            sudo mkdir -p /opt/flyway/sql
+            sudo chown -R ec2-user:ec2-user /opt/flyway
+            chmod 755 /opt/flyway
+          "
+          
           scp -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} -r flyway/tmp/* ec2-user@$EC2_HOST:/opt/flyway/
 
-
-      - name: Execute Migration
-        run: |
           ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ec2-user@$EC2_HOST << 'ENDSSH'
           cd /opt/flyway
           flyway migrate -configFiles=/opt/flyway/flyway.conf
@@ -76,7 +84,7 @@ jobs:
 
       - name: Verify Migration
         run: |
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY_PATH }} ec2-user@$EC2_HOST << 'ENDSSH'
+          ssh -o StrictHostKeyChecking=no ec2-user@$EC2_HOST << 'ENDSSH'
           sudo -u postgres psql -d team7db -c "SELECT version(), current_date;"
           sudo -u postgres psql -d team7db -c "SELECT * FROM flyway_schema_history;"
           ENDSSH
