@@ -5,12 +5,13 @@ import * as userService from '../services/user.service';
 import * as teamService from '../services/team.service';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 import { rolesEnum } from '../utils/rolesEnum';
+import { sanitizeInput } from '../utils/sanitization';
+import { validate as isUuid } from 'uuid';
 
 export const getToDo = async (req: AuthenticatedRequest, res: Response) => {
   const id = Number(req.params['id']);
 
-  if (isNaN(id))
-  {
+  if (isNaN(id)) {
     return res.status(400).send('Todo id must be a valid number');
   }
 
@@ -44,8 +45,7 @@ export const getToDosForTeam = async (req: AuthenticatedRequest, res: Response) 
     }
   }
 
-  if (isNaN(id))
-  {
+  if (isNaN(id)) {
     return res.status(400).send('Team id must be a valid number');
   }
 
@@ -67,13 +67,16 @@ export const getToDosForTeam = async (req: AuthenticatedRequest, res: Response) 
 }
 
 export const create = async (req: AuthenticatedRequest, res: Response) => {
-  const title = req.body?.title;
-  const description = req.body?.description;
+  const rawTitle = req.body?.title || '';
+  const rawDescription = req.body?.description || '';
   const assignedTo = req.body?.assignedTo;
   const teamId = Number(req.body?.teamId);
 
-  if (!title || !description || !assignedTo || isNaN(teamId)) {
-    return res.status(400).send('Title, description, assigned member, and team id are all required');
+  const title = sanitizeInput(rawTitle);
+  const description = sanitizeInput(rawDescription);
+
+  if (!title || !description || !assignedTo || !isUuid(assignedTo) || isNaN(teamId)) {
+    return res.status(400).send('Valid title, description, assigned member, and team id is required');
   }
 
   const assignedUser = await userService.getUserById(assignedTo);
@@ -113,10 +116,13 @@ export const create = async (req: AuthenticatedRequest, res: Response) => {
 
 export const update = async (req: AuthenticatedRequest, res: Response) => {
   const id = Number(req.params['id']);
-  const title = req.body.title;
-  const description = req.body.description;
+  const rawTitle = req.body.title;
+  const rawDescription = req.body.description;
   const assignedTo = req.body.assignedTo;
   const completed = req.body.completed;
+
+  const title = sanitizeInput(rawTitle);
+  const description = sanitizeInput(rawDescription);
 
   if (isNaN(id)) {
     return res.status(400).send('Todo id is required');
@@ -147,6 +153,10 @@ export const update = async (req: AuthenticatedRequest, res: Response) => {
   }
 
   if (assignedTo) {
+    if (!isUuid(assignedTo)) {
+      return res.status(400).send("Please enter a valid assigned to")
+    }
+
     const assignedUser = await userService.getUserById(assignedTo);
     if (!assignedUser) {
       return res.status(404).send("User not found");
@@ -163,8 +173,8 @@ export const update = async (req: AuthenticatedRequest, res: Response) => {
   todoToUpdate.title = title ? title : todoToUpdate.title;
   todoToUpdate.description = description ? description : todoToUpdate.description;
   todoToUpdate.assigned_to = assignedTo ? assignedTo : todoToUpdate.assigned_to;
-  if (typeof completed === 'boolean') {
-    todoToUpdate.completed_at = completed ? new Date() : null;
+  if (typeof completed === 'string') {
+    todoToUpdate.completed_at = completed === 'true' ? new Date() : null;
   }
 
   const updatedTodo = await todoService.updateTodo(id, todoToUpdate.completed_at, todoToUpdate.title!, todoToUpdate.description!, todoToUpdate.assigned_to!);

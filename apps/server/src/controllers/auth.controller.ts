@@ -4,23 +4,34 @@ import * as userService from '../services/user.service';
 import { signJwt, verifyJwt } from '../utils/jwt';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
+import { isValidEmail, isValidPassword, isValidUsername, sanitizeInput } from '../utils/sanitization';
 
 export const signup = async (req: Request, res: Response) => {
-    const name = req.body?.name;
-    const email = req.body?.email;
-    const password = req.body?.password;
+    const rawName = req.body?.name || '';
+    const rawEmail = req.body?.email || '';
+    const rawPassword = req.body?.password || '';
+
+    const name = sanitizeInput(rawName);
+    const email = sanitizeInput(rawEmail.toLowerCase());
+    const password = sanitizeInput(rawPassword);
 
     if (!name || !email || !password) {
         return res.status(400).send('Name, email and password are required');
     }
 
-    // email rules check
+    if (!isValidEmail(email)) {
+        return res.status(400).send("Please enter a valid email");
+    }
+    if (!isValidPassword(password)) {
+        return res.status(400).send("Please enter a valid password (minimum length 8)");
+    }
+    if (!isValidUsername(name)) {
+        return res.status(400).send("Please enter a valid name");
+    }
 
     if (await userService.getUserByEmail(email)) {
         return res.status(409).send("Email already exists");
     }
-
-    // Password rules check
     
     const passwordHash = await argon2.hash(password, {
         type: argon2.argon2id,
@@ -30,7 +41,6 @@ export const signup = async (req: Request, res: Response) => {
     const user = await userService.createUser(name, email, passwordHash, secret2FA.base32, new Date());
 
     const token = signJwt({ userId: user.id, name: user.username, is2FAverified: false, is2FAverifiedSession: false});
-
 
     res.cookie('access_token', token, {
         httpOnly: true,
@@ -49,6 +59,10 @@ export const signup = async (req: Request, res: Response) => {
 export const signup2FA = async (req: Request, res: Response) => {
     let token = req.cookies['access_token'];
     const code2FA = req.body?.code2FA;
+
+    if (isNaN(code2FA)) {
+        return res.status(400).send('Please enter a valid 2FA code');
+    }
 
     if (!token) {
         return res.status(401).send('Authentication token missing');
@@ -130,11 +144,17 @@ export const getQR = async (req: Request, res: Response) => {
 }
 
 export const login = async (req: Request, res: Response) => {
-    const email = req.body?.email;
-    const password = req.body?.password;
+    const rawEmail = req.body?.email || '';
+    const rawPassword = req.body?.password || '';
 
-    if (!email || !password) {
-        return res.status(400).send('Email and password are required');
+    const email = sanitizeInput(rawEmail.toLowerCase());
+    const password = sanitizeInput(rawPassword);
+
+    if (!isValidEmail(email)) {
+        return res.status(400).send("Please enter a valid email");
+    }
+    if (!isValidPassword(password)) {
+        return res.status(400).send("Please enter a valid password (minimum length 8)");
     }
 
     const user = await userService.getUserByEmail(email);
@@ -184,6 +204,10 @@ export const login2FA = async (req: Request, res: Response) => {
     let token = req.cookies['access_token'];
     const code2FA = req.body?.code2FA;
 
+    if (isNaN(code2FA)) {
+        return res.status(400).send('Please enter a valid 2FA code');
+    }
+    
     if (!token) {
         return res.status(401).send('Authentication token missing');
     }

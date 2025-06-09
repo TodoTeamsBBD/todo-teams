@@ -3,15 +3,17 @@ import * as userRoleService from '../services/userRole.service';
 import * as userService from '../services/user.service';
 import * as teamService from '../services/team.service';
 import * as roleService from '../services/role.service';
+import * as todoService from '../services/todo.service';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 import { rolesEnum } from '../utils/rolesEnum';
+import { validate as isUuid } from 'uuid';
 
 export const create = async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.body?.userId;
   const teamId = Number(req.body?.teamId);
 
-  if (!userId || isNaN(teamId)) {
-    return res.status(400).send('User and team are required');
+  if (!userId || !isUuid(userId) || isNaN(teamId)) {
+    return res.status(400).send('Valid user and team are required');
   }
 
   const userToAdd = await userService.getUserById(userId);
@@ -57,11 +59,9 @@ export const update = async (req: AuthenticatedRequest, res: Response) => {
     return res.status(400).send("Role not found")
   }
 
-  let userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamLead, userRoleToUpdate.team_id);
+  let userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.AccessAdministrator, null);
   if (!userRole) {
-    userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.AccessAdministrator, null);
-    if (!userRole)
-      return res.status(403).send("Access denied: You do not have permission to perform this action." );
+    return res.status(403).send("Access denied: You do not have permission to perform this action." );
   }
 
   const updatedUserRole = await userRoleService.updateUserRole(userRoleId, role); 
@@ -80,11 +80,41 @@ export const remove = async (req: AuthenticatedRequest, res: Response) => {
     return res.status(400).send("User role not found")
   }
 
-  let userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamLead, userRoleToRemove.team_id);
-  if (!userRole) {
-    userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.AccessAdministrator, null);
-    if (!userRole)
-      return res.status(403).send("Access denied: You do not have permission to perform this action." );
+  let userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamMember, userRoleToRemove.team_id);
+  if (userRole) {
+    if (userRole.id !== userRoleToRemove.id) {
+      return res.status(403).send("Access denied: You do not have permission to perform this action.");
+    }
+  }
+  else {
+    userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamLead, userRoleToRemove.team_id);
+    if (!userRole) {
+      userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.AccessAdministrator, null);
+      if (!userRole)
+        return res.status(403).send("Access denied: You do not have permission to perform this action.");
+    }
+  }
+
+  if (userRoleToRemove.role_id === rolesEnum.TeamMember) {
+    const teamLead = await userRoleService.getTeamLead(userRoleToRemove.team_id!);
+    if (!teamLead) {
+      return res.status(500).send("There is an issue with your team structure. Please contact an access administrator to assign a team lead");
+    }
+    await todoService.reassignTodosToTeamLeadAssignedTo(userRoleToRemove.user_id, teamLead!.user_id);
+    await todoService.reassignTodosToTeamLeadCreatedBy(userRoleToRemove.user_id, teamLead!.user_id);
+  }
+  else if (userRoleToRemove.role_id === rolesEnum.TeamLead) {
+    const nextTeamLead = await userRoleService.getTeamLead(userRoleToRemove.team_id!, userRoleToRemove.user_id);
+    if (!nextTeamLead) {
+      if(await userRoleService.getTeamCount(userRoleToRemove.team_id!) > 1) {
+        return res.status(403).send("Team lead cannot leave without assigning another team lead. Please contact an access administrator to assign a new team lead")
+      }
+      await todoService.deleteTodosByUser(userRoleToRemove.user_id);
+    }
+    else {
+      await todoService.reassignTodosToTeamLeadAssignedTo(userRoleToRemove.user_id, nextTeamLead.user_id);
+      await todoService.reassignTodosToTeamLeadCreatedBy(userRoleToRemove.user_id, nextTeamLead.user_id);
+    }
   }
 
   await userRoleService.deleteUserRole(userRoleToRemove.id);

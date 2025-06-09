@@ -10,6 +10,21 @@ export const findUserRoleIfExists = (userId: string, roleId: number, teamId : nu
     }
 })
 
+export const getTeamLeadCount = (teamId: number) => prisma.user_roles.count({ where: { team_id: teamId}});
+export const getTeamCount = (teamId: number) => prisma.user_roles.count({ where: { team_id: teamId}});
+
+export const getTeamLead = (teamId: number, excludedTeamLeadId?: string) => prisma.user_roles.findFirst({
+  where: {
+    team_id: teamId,
+    role_id: 2,
+    ...(excludedTeamLeadId && {
+      user_id: {
+        not: excludedTeamLeadId,
+      },
+    }),
+  },
+});
+
 export const createUserRole = (
   userId: string,
   teamId: number,

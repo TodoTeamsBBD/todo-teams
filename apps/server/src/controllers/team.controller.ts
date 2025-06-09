@@ -3,6 +3,7 @@ import * as teamService from '../services/team.service';
 import * as userRoleService from '../services/userRole.service';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 import { rolesEnum } from '../utils/rolesEnum';
+import { sanitizeInput } from '../utils/sanitization';
 
 export const getAllPaginated = async (req: AuthenticatedRequest, res: Response) => {
   let page = Number(req.query['page']);
@@ -24,19 +25,20 @@ export const getAllPaginated = async (req: AuthenticatedRequest, res: Response) 
 export const getTeamsForUser = async (req: AuthenticatedRequest, res: Response) => {
   const teams = await teamService.getTeamsForUser(req.user.id);
  
-  res.status(200).json(teams);
+  return res.status(200).json(teams);
 };
 
 export const create = async (req: AuthenticatedRequest, res: Response) => {
-  const teamName = req.body.teamName;
+  const rawTeamName = req.body?.teamName || '';
 
-  if (!teamName || teamName.trim() === ""){
-    res.status(400).send("A team name is required.");
-    return
+  const teamName = sanitizeInput(rawTeamName);
+
+  if (!teamName){
+    return res.status(400).send("A team name is required.");
   }
 
   const team = await teamService.createTeam(teamName, new Date());
   const userRole = await userRoleService.createUserRole(req.user.id, team.id, rolesEnum.TeamLead);
 
-  res.status(201).json({ message: 'Team created successfully', team, userRole });
+  return res.status(201).json({ message: 'Team created successfully', team, userRole });
 };

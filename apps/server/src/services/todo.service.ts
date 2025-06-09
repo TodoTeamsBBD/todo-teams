@@ -68,3 +68,30 @@ export const updateTodo = (
 };
 
 export const deleteTodo = (id: number) => prisma.todos.delete({ where: { id } });
+
+export const reassignTodosToTeamLeadCreatedBy = (userId: string, teamLeadUserId: string) => prisma.todos.updateMany({
+  where: {
+    created_by: userId,
+  },
+  data: {
+    created_by: teamLeadUserId,
+  },
+});
+
+export const reassignTodosToTeamLeadAssignedTo = (userId: string, teamLeadUserId: string) => prisma.todos.updateMany({
+  where: {
+    assigned_to: userId,
+  },
+  data: {
+    assigned_to: teamLeadUserId,
+  },
+});
+
+export const deleteTodosByUser = (userId: string) => prisma.todos.deleteMany({
+  where: {
+    OR: [
+      { created_by: userId },
+      { assigned_to: userId },
+    ],
+  },
+});
