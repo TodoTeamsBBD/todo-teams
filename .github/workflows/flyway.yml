@@ -63,11 +63,15 @@ jobs:
 
       - name: Copy Files to EC2
         run: |
-          scp -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY_PATH }} -r flyway/tmp/* ec2-user@$EC2_HOST:/opt/flyway/
+          # Set up SSH key
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          scp -o StrictHostKeyChecking=no -r flyway/tmp/* ec2-user@$EC2_HOST:/opt/flyway/
 
       - name: Execute Migration
         run: |
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY_PATH }} ec2-user@$EC2_HOST << 'ENDSSH'
+          ssh -o StrictHostKeyChecking=no ec2-user@$EC2_HOST << 'ENDSSH'
           cd /opt/flyway
           flyway migrate -configFiles=/opt/flyway/flyway.conf
           flyway info -configFiles=/opt/flyway/flyway.conf
