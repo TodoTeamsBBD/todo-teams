@@ -22,7 +22,7 @@ locals {
 
 # Security Group for Express App
 resource "aws_security_group" "express_sg" {
-  name        = "team7-app-sg"
+  name_prefix = "team7-app-sg-"
   description = "Allow SSH, HTTP, and Express app port"
   vpc_id      = aws_default_vpc.default_vpc.id
 
@@ -65,7 +65,7 @@ resource "aws_instance" "express_ec2" {
   ami                         = "ami-0722f955ef0cb4675" # Amazon Linux 2 in us-east-1
   instance_type               = "t3.micro"
   subnet_id                   = data.aws_subnets.default.ids[0]
-  security_groups             = [aws_security_group.express_sg.name]
+  security_groups             = [aws_security_group.express_sg.id]
   key_name                    = "team7-ec2" # Replace with your actual EC2 key pair name
   associate_public_ip_address = true
 
