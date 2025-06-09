@@ -1,0 +1,73 @@
+name: Flyway Database Migrations
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'flyway/**' 
+  workflow_dispatch:  
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    env:
+      EC2_HOST: ${{ secrets.EC2_HOST }}
+      FLYWAY_VERSION: 9.22.3
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.7.0
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
+          role-session-name: run flyway migration
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get Database Credentials
+        id: get-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        with:
+          secrets: |
+            prod/todo/postgress
+          parse-json: true
+
+      - name: Install Flyway
+        run: |
+          wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/$FLYWAY_VERSION/flyway-commandline-$FLYWAY_VERSION-linux-x64.tar.gz | tar xvz
+          sudo mv flyway-$FLYWAY_VERSION /opt/flyway
+          sudo ln -s /opt/flyway/flyway /usr/local/bin/flyway
+
+      - name: Prepare Flyway Files
+        run: |
+          mkdir -p flyway/tmp
+          cp flyway/*.sql flyway/tmp/
+          
+          # Generate flyway.conf with actual credentials
+          cat <<EOF > flyway/tmp/flyway.conf
+          flyway.url=jdbc:postgresql://$EC2_HOST:5432/team7db
+          flyway.user=${{ fromJSON(steps.get-secrets.outputs.secret-json).username }}
+          flyway.password=${{ fromJSON(steps.get-secrets.outputs.secret-json).password }}
+          flyway.locations=filesystem:/opt/flyway/sql
+          flyway.baselineOnMigrate=true
+          EOF
+
+      - name: Copy Files to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY_PATH }} -r flyway/tmp/* ec2-user@$EC2_HOST:/opt/flyway/
+
+      - name: Execute Migration
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY_PATH }} ec2-user@$EC2_HOST << 'ENDSSH'
+          cd /opt/flyway
+          flyway migrate -configFiles=/opt/flyway/flyway.conf
+          flyway info -configFiles=/opt/flyway/flyway.conf
+          ENDSSH
+
+      - name: Verify Migration
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY_PATH }} ec2-user@$EC2_HOST << 'ENDSSH'
+          sudo -u postgres psql -d team7db -c "SELECT version(), current_date;"
+          sudo -u postgres psql -d team7db -c "SELECT * FROM flyway_schema_history;"
+          ENDSSH
