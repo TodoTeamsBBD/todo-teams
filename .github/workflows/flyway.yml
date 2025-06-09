@@ -68,7 +68,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-          ssh ec2-user@$EC2_HOST "
+          ssh -o StrictHostKeyChecking=no ec2-user@$EC2_HOST "
             sudo mkdir -p /opt/flyway/sql
             sudo chown -R ec2-user:ec2-user /opt/flyway
             chmod 755 /opt/flyway
