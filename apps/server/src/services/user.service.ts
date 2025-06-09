@@ -51,3 +51,10 @@ export const createUser = (
     created_at: createdAt
   }
 });
+
+export const set2FAverified = (userId: string) => {
+    return prisma.users.update({
+        where: { id: userId},
+        data: {two_factor_verified: true},
+    });
+}
