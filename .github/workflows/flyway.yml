@@ -6,7 +6,10 @@ on:
     paths:
       - 'flyway/**' 
   workflow_dispatch:  
-
+  
+env:
+  AWS_REGION: af-south-1
+  
 jobs:
   migrate:
     runs-on: ubuntu-latest
