@@ -75,8 +75,8 @@ jobs:
           wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/$FLYWAY_VERSION/flyway-commandline-$FLYWAY_VERSION-linux-x64.tar.gz | tar xvz
           sudo mv flyway-$FLYWAY_VERSION /opt/flyway
           cd /opt/flyway
-          /opt/flyway/flyway-$FLYWAY_VERSION migrate -configFiles=/opt/flyway/flyway.conf
-          /opt/flyway/flyway-$FLYWAY_VERSION info -configFiles=/opt/flyway/flyway.conf
+          /opt/flyway/flyway-$FLYWAY_VERSION/flyway migrate -configFiles=/opt/flyway/flyway.conf
+          /opt/flyway/flyway-$FLYWAY_VERSION/flyway info -configFiles=/opt/flyway/flyway.conf
           ENDSSH
 
       - name: Verify Migration
