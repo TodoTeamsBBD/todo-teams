@@ -38,6 +38,8 @@ jobs:
           secret-ids: |
             prod/todo/postgress
           parse-json-secrets: true
+          name-transformation: lowercase
+
 
       - name: Install Flyway
         run: |
@@ -53,8 +55,8 @@ jobs:
           # Generate flyway.conf with actual credentials
           cat <<EOF > flyway/tmp/flyway.conf
           flyway.url=jdbc:postgresql://$EC2_HOST:5432/team7db
-          flyway.user=${{ fromJSON(steps.get-secrets.outputs.secret-json).username }}
-          flyway.password=${{ fromJSON(steps.get-secrets.outputs.secret-json).password }}
+          flyway.user=${{ env.prod_todo_postgress_username}}
+          flyway.password=${{ env.prod_todo_postgress_password }}
           flyway.locations=filesystem:/opt/flyway/sql
           flyway.baselineOnMigrate=true
           EOF
