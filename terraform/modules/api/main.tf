@@ -97,12 +97,16 @@ resource "aws_instance" "api" {
                   # Install Node.js
                   curl -sL https://rpm.nodesource.com/setup_20.x | bash -
                   yum install -y nodejs
+                  yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 
                   # Install PM2 (process manager)
                   npm install -g pm2
 
                   # Create app directory
                   mkdir -p /var/www/api
+                  systemctl enable amazon-ssm-agent
+                  systemctl start amazon-ssm-agent
+
                   EOF
 
   tags = {
