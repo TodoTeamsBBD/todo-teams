@@ -42,7 +42,7 @@ export class DashboardPage {
   }
 
   addTeam() {
-    this.dialog.open(ParticipantSearchBar, {
+    this.dialog.open(CreateTeamForm, {
       maxWidth: '90vw',
       // disableClose: true,
       autoFocus: true
