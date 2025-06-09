@@ -65,7 +65,7 @@ resource "aws_instance" "express_ec2" {
   ami                         = "ami-0722f955ef0cb4675" # Amazon Linux 2 in us-east-1
   instance_type               = "t3.micro"
   subnet_id                   = data.aws_subnets.default.ids[0]
-  security_groups             = [aws_security_group.express_sg.id]
+  vpc_security_group_ids = [aws_security_group.express_sg.id]
   key_name                    = "team7-ec2" # Replace with your actual EC2 key pair name
   associate_public_ip_address = true
 
@@ -97,8 +97,7 @@ resource "aws_instance" "express_ec2" {
           PORT: 3000,
           DB_HOST: "localhost",
           DB_PORT: 5432,
-          DB_USERNAME: '${local.db_creds.username}',
-          DB_PASSWORD: '${local.db_creds.password}'
+          PRISMA_DATABASE_URL: "postgresql://${local.db_creds.username}:${local.db_creds.password}@localhost:5432/team7db"
         },
         error_file: "/var/log/node-api.err.log",
         out_file: "/var/log/node-api.out.log",
