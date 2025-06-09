@@ -31,8 +31,8 @@ export const authGuard: CanActivateFn = (route, state) => {
       // If user exists but 2FA not completed, handle 2FA flow
       if (isAuthenticated && is2FAVerified && !is2FAVerifiedSession) {
         // User has 2FA enabled but not verified in this session - send to login
-        if (state.url !== '/login') {
-          router.navigate(['/login']);
+        if (state.url !== '/verify-2fa') {
+          router.navigate(['/verify-2fa']);
           return false;
         }
         return true;

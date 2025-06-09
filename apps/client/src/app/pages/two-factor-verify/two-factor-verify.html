@@ -1,0 +1,18 @@
+<div class="setup-container">
+      <div class="setup-header">
+        <h1>Enable Two-Factor Authentication</h1>
+        <p class="header-subtitle">Verify your account with Microsoft Authenticator</p>
+      </div>
+
+      <div class="setup-content">
+        <div class="components-wrapper">
+          <app-pin-input
+            [hasError]="verificationError"
+            title="Step 2: Enter Verification Code"
+            subtitle="Enter the 6-digit code from Microsoft Authenticator"
+            (pinComplete)="verifyPin($event)"
+          ></app-pin-input>
+        </div>
+      </div>
+    </div>
+

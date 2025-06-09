@@ -3,8 +3,12 @@
     <span class="logo-text">To-Do</span>
     <!-- Example navbar links -->
     <nav class="nav-links">
-      <a routerLink="/dashboard">Dashboard</a>
-      <a routerLink="/logout">Logout</a>
+      <button
+        class="logout-button"
+        (click)="onLogout()"
+        [disabled]="isLoggingOut">
+        {{ isLoggingOut ? 'Logging out...' : 'Logout' }}
+      </button>
     </nav>
   </div>
 </div>
