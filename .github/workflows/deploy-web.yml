@@ -23,7 +23,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: apps/client
+        working-directory: ./apps/client
 
     steps:
       - name: Checkout repo
@@ -42,19 +42,13 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm i
 
       - name: Build Angular app
         run: npm run build
 
-      - name: Zip Angular build
-        run: |
-          cd dist
-          zip -r angular-app.zip *
-        working-directory: apps/client/dist
-
       - name: Upload to S3
-        run: aws s3 cp dist/ s3://${{ env.S3_BUCKET }}/ --recursive --exclude "*" --include "*.html" --include "*.js" --include "*.css" --include "*.ico"
+        run: aws s3 cp dist/browser s3://${{ env.S3_BUCKET }}/ --recursive --exclude "*" --include "*.html" --include "*.js" --include "*.css" --include "*.ico"
 
       - name: Invalidate CloudFront cache
         run: |

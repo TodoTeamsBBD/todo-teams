@@ -3,17 +3,15 @@ name: Terraform
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 env:
   AWS_REGION: af-south-1
-  TF_WORKING_DIR: terraform 
+  TF_WORKING_DIR: terraform  # Define your Terraform directory here
 
-  
+# Permission can be added at job level or workflow level    
 permissions:
-  id-token: write   
-  contents: read   
+  id-token: write   # Required for requesting the JWT
+  contents: read    # Required for actions/checkout
 
 jobs:
   terraform:
@@ -21,28 +19,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      
+      # Checkout the repository
       - name: Checkout
         uses: actions/checkout@v3
 
+      # Configure AWS credentials using OIDC
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
-          role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
+          role-to-assume: arn:aws:iam::957617350095:role/GitHubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ env.AWS_REGION }}
 
+      # Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
+      # Initialize Terraform
       - name: Terraform Init
         run: terraform init
         working-directory: ${{ env.TF_WORKING_DIR }}
 
+      # Run Terraform plan (on PRs and pushes)
       - name: Terraform Plan
         run: terraform plan
         working-directory: ${{ env.TF_WORKING_DIR }}
 
+      # Apply Terraform changes (only on main branch pushes)
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
