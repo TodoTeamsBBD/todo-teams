@@ -56,13 +56,7 @@ export class SignUpPage {
       next: (response: any) => {
         console.log('Signup successful:', response);
 
-        this.router.navigate(['/signup-2fa'], {
-          state: {
-            qrCodeUrl: response.qrCodeUrl,
-            userId: response.userId,
-            name: response.name
-          }
-        });
+        this.router.navigate(['/signup-2fa']);
       },
       error: (error) => {
         console.error('Signup error:', error);
