@@ -32,6 +32,7 @@ jobs:
           # SSH commands to restart the app
           ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << 'ENDSSH'
           cd /var/www/api
+          echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" > .env
           npm i
           npx prisma generate 
           pm2 restart ecosystem.config.js
