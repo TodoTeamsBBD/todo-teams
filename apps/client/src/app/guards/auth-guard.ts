@@ -23,7 +23,7 @@ export const authGuard: CanActivateFn = (route, state) => {
 
         // 🚫 Admin trying to access user dashboard
         if (isAccessAdmin && state.url.startsWith('/dashboard')) {
-          router.navigate(['/accessadmin']);
+          router.navigate(['/access-admin']);
           return false;
         }
 
@@ -37,9 +37,10 @@ export const authGuard: CanActivateFn = (route, state) => {
         if (
           state.url === '/login' ||
           state.url === '/signup' ||
-          state.url === '/signup-2fa'
+          state.url === '/signup-2fa' || 
+          state.url === '/verify-2fa'
         ) {
-          router.navigate([isAccessAdmin ? '/accessadmin' : '/dashboard']);
+          router.navigate([isAccessAdmin ? '/access-admin' : '/dashboard']);
           return false;
         }
 
