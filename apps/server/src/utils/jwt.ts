@@ -8,6 +8,7 @@ export interface JwtPayload {
   name: string;
   is2FAverified: boolean;
   is2FAverifiedSession: boolean;
+  isAccessAdmin: boolean;
 }
 
 export function signJwt(payload: JwtPayload): string {
