@@ -35,6 +35,14 @@ resource "aws_security_group" "express_sg" {
   }
 
   ingress {
+    description = "HTTPS"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     description = "HTTP"
     from_port   = 80
     to_port     = 80
@@ -75,6 +83,8 @@ resource "aws_instance" "express_ec2" {
 
     curl -sL https://rpm.nodesource.com/setup_20.x | bash -
     yum install -y nodejs git
+    sudo yum install nginx -y
+    sudo yum install python3-certbot-nginx -y
     npm install -g pm2
 
     pm2 startup systemd -u ec2-user --hp /home/ec2-user
@@ -111,7 +121,7 @@ resource "aws_instance" "express_ec2" {
     touch /var/log/node-api.{err,out}.log
     chown ec2-user:ec2-user /var/log/node-api.{err,out}.log
 
-    dnf install -y postgresql15 postgresql15-server
+    dnf install -y postgresql15 postgresql15-server postgresql15-contrib
     /usr/bin/postgresql-setup --initdb
     systemctl enable postgresql
     systemctl start postgresql
