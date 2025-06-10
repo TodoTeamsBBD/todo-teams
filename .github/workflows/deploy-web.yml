@@ -48,7 +48,7 @@ jobs:
         run: npm run build
 
       - name: Upload to S3
-        run: aws s3 cp dist/browser s3://${{ env.S3_BUCKET }}/ --recursive --exclude "*" --include "*.html" --include "*.js" --include "*.css" --include "*.ico"
+        run: aws s3 cp dist/client/browser s3://${{ env.S3_BUCKET }}/ --recursive --exclude "*" --include "*.html" --include "*.js" --include "*.css" --include "*.ico"
 
       - name: Invalidate CloudFront cache
         run: |
