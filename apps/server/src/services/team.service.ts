@@ -24,4 +24,6 @@ export const createTeam = (teamName: string, createdAt: Date) =>
       name: teamName,
       created_at: createdAt
     }
-  });
+});
+
+export const deleteTeam = (teamId: number) => prisma.teams.delete({where : {id: teamId}});
