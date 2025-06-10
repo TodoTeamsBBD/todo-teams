@@ -1,7 +1,8 @@
 
 .team-list {
   padding: 5rem;
-  height: 32rem;
+  /* height: 32rem; */
+  max-height: 32rem;
   display: flex;
   flex-direction: column;
 }
@@ -22,10 +23,14 @@ mat-list {
   max-height: 100%;
 }
 
+.team-id {
+  padding: 1rem
+}
+
 .team-item {
   cursor: pointer;
   transition: background-color 0.2s ease;
-  padding: 16px !important;
+  padding: 2rem !important;
 }
 
 .team-item:hover {
@@ -46,6 +51,7 @@ mat-list {
 
 .team-info {
   flex: 1;
+  padding: 2rem;
 }
 
 .team-name {

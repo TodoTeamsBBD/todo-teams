@@ -1,15 +1,13 @@
 import { inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { CanActivateFn, Router } from '@angular/router';
 import { map, catchError, of } from 'rxjs';
+import { AuthService } from '../services/authservice';
 
 export const authGuard: CanActivateFn = (route, state) => {
-  const http = inject(HttpClient);
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  return http.get('http://localhost:3000/auth/me', {
-    withCredentials: true
-  }).pipe(
+  return authService.getCurrentUserState().pipe(
     map((response: any) => {
       console.log('User details response:', response);
 

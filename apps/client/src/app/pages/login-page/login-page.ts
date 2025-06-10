@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { UserAuthForm, FormField } from '../../components/user-auth-form/user-auth-form';
 import { AuthService, LoginRequest } from '../../services/authservice';
 
@@ -11,7 +10,7 @@ import { AuthService, LoginRequest } from '../../services/authservice';
   styleUrl: './login-page.css'
 })
 export class LoginPage {
-  private http = inject(HttpClient);
+  private authService = inject(AuthService);
   loginFields: FormField[] = [
     {
       name: 'email',
@@ -33,7 +32,6 @@ export class LoginPage {
   errorMessage = '';
 
   constructor(
-    private authService: AuthService,
     private router: Router
   ) {}
 
@@ -62,24 +60,17 @@ export class LoginPage {
   }
 
   private checkUserStateAndNavigate() {
-    this.http.get('http://localhost:3000/auth/me', {
-      withCredentials: true
-    }).subscribe({
-      next: (response: any) => {
-        console.log('User state after login:', response);
+      this.authService.getCurrentUserState().subscribe({
+      next: (userState) => {
+        console.log('User state after login:', userState);
 
-        const isAuthenticated = response.userId !== undefined;
-        const is2FAVerified = response.verified2FA === true;
-        const is2FAVerifiedSession = response.verified2FAsession === true;
+        const { userId, verified2FA, verified2FAsession } = userState;
 
-        if (isAuthenticated && is2FAVerified && is2FAVerifiedSession) {
-          // Fully authenticated - go to dashboard
+        if (userId && verified2FA && verified2FAsession) {
           this.router.navigate(['/dashboard']);
-        } else if (isAuthenticated && is2FAVerified && !is2FAVerifiedSession) {
-          // 2FA enabled but not verified in this session
+        } else if (userId && verified2FA && !verified2FAsession) {
           this.router.navigate(['/verify-2fa']);
-        } else if (isAuthenticated && !is2FAVerified) {
-          // User exists but 2FA not set up
+        } else if (userId && !verified2FA) {
           this.router.navigate(['/signup-2fa']);
         }
 

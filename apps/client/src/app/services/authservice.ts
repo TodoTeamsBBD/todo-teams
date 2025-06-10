@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { ConfigService } from './config';
 
 export interface LoginRequest {
   email: string;
@@ -9,6 +10,18 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
+  message: string;
+  userId: string;
+  name: string;
+}
+
+export interface SignupRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface SignupResponse {
   message: string;
   userId: string;
   name: string;
@@ -24,38 +37,92 @@ export interface Verify2FAResponse {
   name: string;
 }
 
+export interface Enable2FARequest {
+  code2FA: string;
+}
+
+export interface Enable2FAResponse {
+  message: string;
+  userId: string;
+  name: string;
+}
+
+export interface UserState {
+  userId?: string;
+  verified2FA?: boolean;
+  verified2FAsession?: boolean;
+}
+
+export interface NavigationResult {
+  path: string;
+  userState: UserState;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/auth'; // Update with your API URL
+  private apiUrl: string;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private configService: ConfigService
+  ) {
+    this.apiUrl = this.configService.apiUrl;
+  }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials, {
-      withCredentials: true // Important for cookies
-    }).pipe(
-      catchError(this.handleError)
-    );
+    return this.post<LoginResponse>('auth/login', credentials);
+  }
+
+  signup(credentials: SignupRequest): Observable<SignupResponse> {
+    return this.post<SignupResponse>('auth/signup', credentials);
   }
 
   verify2FA(request: Verify2FARequest): Observable<Verify2FAResponse> {
-    return this.http.post<Verify2FAResponse>(`${this.apiUrl}/login2FA`, request, {
-      withCredentials: true // Important for cookies
+    return this.post<Verify2FAResponse>('auth/login/2fa', request);
+  }
+
+  enable2FA(request: Enable2FARequest): Observable<Enable2FAResponse> {
+    return this.post<Enable2FAResponse>('auth/signup/2fa', request);
+  }
+
+  logout(): Observable<string> {
+    return this.postText('auth/logout', {});
+  }
+
+  private post<T>(endpoint: string, body: any): Observable<T> {
+    return this.http.post<T>(`${this.apiUrl}/${endpoint}`, body, {
+      withCredentials: true
     }).pipe(
       catchError(this.handleError)
     );
   }
 
-  logout(): Observable<string> {
-    return this.http.post(`${this.apiUrl}/logout`, {}, {
+  private postText(endpoint: string, body: any): Observable<string> {
+    return this.http.post(`${this.apiUrl}/${endpoint}`, body, {
       withCredentials: true,
       responseType: 'text'
     }).pipe(
       catchError(this.handleError)
     );
   }
+
+  getCurrentUserState(): Observable<UserState> {
+    return this.http.get<UserState>(`${this.apiUrl}/auth/me`, {
+      withCredentials: true
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  fetchSignupQRCode(): Observable<{ qrCodeUrl: string }> {
+  return this.http.get<{ qrCodeUrl: string }>(`${this.apiUrl}/auth/signup/qr`, {
+    withCredentials: true
+  }).pipe(
+    catchError(this.handleError)
+  );
+}
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An unknown error occurred';
