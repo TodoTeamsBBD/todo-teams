@@ -15,6 +15,7 @@ export const getTeamMembers = (teamId: number) => prisma.user_roles.findMany({
   where: { team_id: teamId},
   select: {
     id: true,
+    role_id: true,
     users: {
       select: {
         username: true,

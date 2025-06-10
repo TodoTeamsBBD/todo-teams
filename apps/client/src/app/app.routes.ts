@@ -7,6 +7,7 @@ import { TwoFactorAuthPage } from './pages/two-factor-auth-page/two-factor-auth-
 import { TwoFactorVerify } from './pages/two-factor-verify/two-factor-verify.js';
 import { authGuard } from './guards/auth-guard.js';
 import { publicGuard } from './guards/public-guard.js';
+import { AccessAdministratorPage } from './pages/access-administrator-page/access-administrator-page.js';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -15,5 +16,6 @@ export const routes: Routes = [
     { path: 'to-do-list', component: ToDoList, canActivate: [authGuard]},
     { path: 'dashboard', component: DashboardPage, canActivate: [authGuard]},
     { path: 'signup-2fa', component: TwoFactorAuthPage, canActivate: [authGuard]},
-    { path: 'verify-2fa', component: TwoFactorVerify, canActivate: [authGuard]}
+    { path: 'verify-2fa', component: TwoFactorVerify, canActivate: [authGuard]},
+    { path: 'access-admin', component: AccessAdministratorPage, canActivate: [authGuard]},
 ];

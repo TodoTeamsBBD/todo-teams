@@ -1,78 +1,57 @@
 <div class="search-table-container">
   <h2>Add Participant</h2>
-    <div class="search-container">
-          <div class="search-section">
-            <form [formGroup]="searchForm" class="search-form">
-              <div class="search-input-group">
-                <input
-                  type="text"
-                  formControlName="searchTerm"
-                  placeholder="Search by name, email, or department..."
-                  class="search-input"
-                >
-                <button type="button" class="search-icon" disabled>
-                  🔍
-                </button>
-              </div>
-            </form>
-          </div>
-          <div class="action-buttons">
-            <button
-              type="button"
-              class="btn btn-primary"
-              (click)="onAdd()">
-              <mat-icon >add</mat-icon>
-            </button>
-          </div>
-    </div>
-
-
-      <!-- Loading Spinner -->
-      <div *ngIf="loading" class="loading-spinner">
-        <div class="spinner"></div>
-        <p>Loading data...</p>
-      </div>
-
-      <!-- Data Table -->
-      <div *ngIf="!loading" class="table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>
-                <input
-                  type="checkbox"
-                  [checked]="isAllSelected()"
-                  (change)="toggleSelectAll()"
-                  [indeterminate]="selectedItems.size > 0 && !isAllSelected()"
-                >
-              </th>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Department</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of filteredData"
-                [class.selected]="isSelected(item.id)">
-              <td>
-                <input
-                  type="checkbox"
-                  [checked]="isSelected(item.id)"
-                  (change)="toggleSelection(item.id)"
-                >
-              </td>
-              <td>{{ item.id }}</td>
-              <td>{{ item.name }}</td>
-              <td>{{ item.email }}</td>
-              <td>{{ item.department }}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- No Results Message -->
-        <div *ngIf="filteredData.length === 0 && !loading" class="no-results">
-          <p>No results found for your search.</p>
+  <div class="search-container">
+    <div class="search-section">
+      <form class="search-form">
+        <div class="search-input-group">
+          <input
+            type="text"
+            placeholder="Search by name, email, or department..."
+            class="search-input"
+            disabled
+          />
+          <button type="button" class="search-icon" disabled>🔍</button>
         </div>
-      </div>
+      </form>
     </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading data...</p>
+  </div>
+
+  <!-- Data Table -->
+  <div *ngIf="!loading && data.length > 0" class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Toggle Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of data">
+          <td>{{ item.id }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.email }}</td>
+          <td>{{ item.role }}</td>
+          <td>
+          <select [ngModel]="item.role_id" (change)="changeRole(item, $event)">
+            <option [value]="2">TeamLead</option>
+            <option [value]="3">TeamMember</option>
+          </select>
+        </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!loading && data.length === 0" class="no-data-message">
+    <p>No participants found.</p>
+  </div>
+</div>
