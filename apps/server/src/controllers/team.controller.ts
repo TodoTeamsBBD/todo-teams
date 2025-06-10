@@ -10,7 +10,7 @@ export const getAllPaginated = async (req: AuthenticatedRequest, res: Response) 
   let pageSize = Number(req.query['pageSize']);
 
   if (isNaN(page) || page < 1) page = 1;
-  if (isNaN(pageSize) || pageSize < 1) pageSize = 10;
+  if (isNaN(pageSize) || pageSize < 1) pageSize = 5;
 
   const userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.AccessAdministrator, null);
 

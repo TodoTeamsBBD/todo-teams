@@ -10,7 +10,7 @@ import { validate as isUuid } from 'uuid';
 
 
 export const getTeamMembers = async (req: AuthenticatedRequest, res: Response) => {
-  const teamId = Number(req.body?.teamId);
+  const teamId = Number(req.params['teamId']);
 
   if (isNaN(teamId)) {
     return res.status(400).send('Valid team id is required');

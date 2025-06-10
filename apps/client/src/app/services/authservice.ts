@@ -122,7 +122,9 @@ export class AuthService {
   }).pipe(
     catchError(this.handleError)
   );
-}
+  }
+
+
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An unknown error occurred';

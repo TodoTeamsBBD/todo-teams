@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ConfigService } from './config';
 
@@ -14,6 +14,14 @@ export interface Role {
   name: string;
 }
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  department: string;
+  status: string;
+}
+
 export interface UserTeam {
   id: number;
   user_id: string;
@@ -21,6 +29,22 @@ export interface UserTeam {
   role_id: number;
   teams: Team;
   roles: Role;
+  user: User; // 👈 include this
+}
+
+export interface TeamMember {
+  id: number;
+  role_id: number;
+  users: {
+    username: string;
+    email: string;
+  };
+  teams: {
+    name: string;
+  };
+  roles: {
+    name: string;
+  };
 }
 
 export interface CreateTeamRequest {
@@ -31,6 +55,14 @@ export interface CreateTeamResponse {
   message: string;
   team: Team;
   userRole: any;
+}
+
+export interface PaginatedTeams {
+  data: Team[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 @Injectable({
@@ -57,4 +89,30 @@ export class TeamService {
       withCredentials: true
     });
   }
+
+  getTeams(page: number, pageSize: number): Observable<PaginatedTeams> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get<PaginatedTeams>(`${this.apiUrl}/api/teams`, {
+      params,
+      withCredentials: true
+    });
+  }
+
+ getTeamMembers(teamId: number): Observable<TeamMember[]> {
+    return this.http.get<TeamMember[]>(`${this.apiUrl}/api/user-roles/team/${teamId}`, {
+      withCredentials: true
+    });
+  }
+
+  updateUserRole(userRoleId: number, newRoleId: number): Observable<any> {
+    return this.http.put<any>(
+      `${this.apiUrl}/api/user-roles/${userRoleId}`,
+      { role: newRoleId },
+      { withCredentials: true }
+    );
+  }
+
 }
