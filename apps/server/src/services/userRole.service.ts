@@ -1,4 +1,5 @@
 import prisma from '../utils/prisma';
+import { rolesEnum } from '../utils/rolesEnum';
 
 export const getUserRoleById = (id: number) => prisma.user_roles.findUnique({ where: { id } });
 
@@ -66,3 +67,11 @@ export const updateUserRole = (id: number, newRoleId: number) => prisma.user_rol
 });
 
 export const deleteUserRole = (id: number) => prisma.user_roles.delete({ where: { id } });
+
+export const isAccessAdmin = (userId: string) => prisma.user_roles.findFirst({
+  where: {
+    user_id: userId,
+    team_id: null,
+    role_id: rolesEnum.AccessAdministrator
+  }
+});

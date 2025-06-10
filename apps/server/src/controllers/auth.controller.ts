@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import argon2 from 'argon2';
 import * as userService from '../services/user.service';
+import * as userRoleService from '../services/userRole.service';
 import { signJwt, verifyJwt } from '../utils/jwt';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
@@ -40,7 +41,7 @@ export const signup = async (req: Request, res: Response) => {
 
     const user = await userService.createUser(name, email, passwordHash, secret2FA.base32, new Date());
 
-    const token = signJwt({ userId: user.id, name: user.username, is2FAverified: false, is2FAverifiedSession: false});
+    const token = signJwt({ userId: user.id, name: user.username, is2FAverified: false, is2FAverifiedSession: false, isAccessAdmin: false});
 
     res.cookie('access_token', token, {
         httpOnly: true,
@@ -94,7 +95,7 @@ export const signup2FA = async (req: Request, res: Response) => {
 
     await userService.set2FAverified(user.id);
 
-    token = signJwt({ userId: user.id, name: user.username, is2FAverified: true, is2FAverifiedSession: true});
+    token = signJwt({ userId: user.id, name: user.username, is2FAverified: true, is2FAverifiedSession: true, isAccessAdmin: false});
 
     res.cookie('access_token', token, {
         httpOnly: true,
@@ -168,7 +169,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     if (!user.two_factor_verified) {
-        const token = signJwt({ userId: user.id, name: user.username, is2FAverified: false, is2FAverifiedSession: false});
+        const token = signJwt({ userId: user.id, name: user.username, is2FAverified: false, is2FAverifiedSession: false, isAccessAdmin: false});
 
         res.cookie('access_token', token, {
             httpOnly: true,
@@ -184,7 +185,7 @@ export const login = async (req: Request, res: Response) => {
         });
     }
 
-    const token = signJwt({ userId: user.id, name: user.username, is2FAverified: user.two_factor_verified, is2FAverifiedSession: false});
+    const token = signJwt({ userId: user.id, name: user.username, is2FAverified: user.two_factor_verified, is2FAverifiedSession: false, isAccessAdmin: false});
 
     res.cookie('access_token', token, {
         httpOnly: true,
@@ -236,7 +237,9 @@ export const login2FA = async (req: Request, res: Response) => {
     if (!verified) 
         return res.status(401).send("Invalid 2FA token");
 
-    token = signJwt({ userId: user.id, name: user.username, is2FAverified: true, is2FAverifiedSession: true});
+    const isAccessAdmin = await userRoleService.isAccessAdmin(user.id);
+
+    token = signJwt({ userId: user.id, name: user.username, is2FAverified: true, is2FAverifiedSession: true, isAccessAdmin: !!isAccessAdmin});
 
     res.cookie('access_token', token, {
         httpOnly: true,
@@ -277,6 +280,7 @@ export const getUserDetails = async (req: Request, res: Response) => {
         userId: payload.userId, 
         name: payload.name, 
         verified2FA: payload.is2FAverified, 
-        verified2FAsession: payload.is2FAverifiedSession
+        verified2FAsession: payload.is2FAverifiedSession,
+        isAccessAdmin: payload.isAccessAdmin
     });
 }
