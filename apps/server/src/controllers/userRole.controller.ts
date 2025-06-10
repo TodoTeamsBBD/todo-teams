@@ -8,6 +8,32 @@ import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 import { rolesEnum } from '../utils/rolesEnum';
 import { validate as isUuid } from 'uuid';
 
+
+export const getTeamMembers = async (req: AuthenticatedRequest, res: Response) => {
+  const teamId = Number(req.body?.teamId);
+
+  if (isNaN(teamId)) {
+    return res.status(400).send('Valid team id is required');
+  }
+
+  const team = await teamService.getTeamById(teamId);
+  if (!team) {
+    return res.status(404).send("Team not found")
+  }
+
+  const userRoleCheck1 = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamMember, teamId);
+  const userRoleCheck2 = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamLead, teamId);
+  const userRoleCheck3 = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.AccessAdministrator, null);
+  
+  if (!userRoleCheck1 && !userRoleCheck2 && !userRoleCheck3) {
+    return res.status(403).send("Cannot view members of a team you are not in")
+  }
+
+  const teamMembers = await userRoleService.getTeamMembers(teamId);
+
+  return res.status(200).json(teamMembers);
+}
+
 export const create = async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.body?.userId;
   const teamId = Number(req.body?.teamId);
@@ -33,7 +59,7 @@ export const create = async (req: AuthenticatedRequest, res: Response) => {
 
   const userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.TeamLead, teamId);
   if (!userRole) {
-    return res.status(403).send("Access denied: You do not have permission to perform this action." );
+    return res.status(403).send("Access denied: You do not have permission to perform this action.");
   }
 
   const userRoleCreated = await userRoleService.createUserRole(userToAdd.id, teamId, rolesEnum.TeamMember);

@@ -4,6 +4,7 @@ import { requireAuth } from '../middlewares/auth.middleware';
 
 const router = Router();
 
+router.get('/team/:teamId', requireAuth, userRoleController.getTeamMembers);
 router.post('/', requireAuth, userRoleController.create);
 router.put('/:id', requireAuth, userRoleController.update);
 router.delete('/:id', requireAuth, userRoleController.remove);
