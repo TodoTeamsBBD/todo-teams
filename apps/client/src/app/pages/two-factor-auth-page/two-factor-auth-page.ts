@@ -1,8 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { QrCodeDisplay } from '../../components/qr-code-display/qr-code-display';
 import { PinInput } from '../../components/pin-input/pin-input';
+import { AuthService, Enable2FARequest } from '../../services/authservice';
 
 @Component({
   selector: 'app-two-factor-auth-page',
@@ -12,7 +12,7 @@ import { PinInput } from '../../components/pin-input/pin-input';
 })
 export class TwoFactorAuthPage implements OnInit {
   private router = inject(Router);
-  private http = inject(HttpClient);
+  private authService = inject(AuthService);
 
   currentStep: number = 1;
   qrCodeUrl: string = '';
@@ -30,10 +30,8 @@ export class TwoFactorAuthPage implements OnInit {
     this.isLoadingQR = true;
     this.qrError = false;
 
-    this.http.get('http://localhost:3000/auth/signup/qr', {
-      withCredentials: true
-    }).subscribe({
-      next: (response: any) => {
+    this.authService.fetchSignupQRCode().subscribe({
+      next: (response) => {
         console.log('QR Code fetched successfully:', response);
         this.qrCodeUrl = response.qrCodeUrl;
         this.isLoadingQR = false;
@@ -57,19 +55,16 @@ export class TwoFactorAuthPage implements OnInit {
     });
   }
 
+
   verifyPin(pin: string): void {
     this.isVerifying = true;
     this.verificationError = false;
 
-    const verificationData = {
-      code2FA: pin
-    };
+    const request: Enable2FARequest = { code2FA: pin };
 
-    this.http.post('http://localhost:3000/auth/signup/2fa', verificationData, {
-      withCredentials: true
-    }).subscribe({
-      next: (response: any) => {
-        console.log('2FA verification successful:', response);
+    this.authService.enable2FA(request).subscribe({
+      next: () => {
+        console.log('2FA verification successful');
         this.isVerifying = false;
         this.currentStep = 2;
 

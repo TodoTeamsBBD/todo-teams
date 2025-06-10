@@ -1,18 +1,17 @@
 import { Component, inject} from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { QrCodeDisplay } from '../../components/qr-code-display/qr-code-display';
 import { PinInput } from '../../components/pin-input/pin-input';
+import { AuthService, Verify2FARequest, UserState } from '../../services/authservice';
 
 @Component({
   selector: 'app-two-factor-auth-page',
-  imports: [QrCodeDisplay, PinInput],
+  imports: [PinInput],
   templateUrl: './two-factor-verify.html',
   styleUrl: './two-factor-verify.css'
 })
 export class TwoFactorVerify{
   private router = inject(Router);
-  private http = inject(HttpClient);
+  private authService = inject(AuthService);
 
   qrCodeUrl: string = '';
   verificationError: boolean = false;
@@ -25,15 +24,11 @@ export class TwoFactorVerify{
     this.isVerifying = true;
     this.verificationError = false;
 
-    const verificationData = {
-      code2FA: pin
-    };
+    const request: Verify2FARequest = { code2FA: pin };
 
-    this.http.post('http://localhost:3000/auth/login/2fa', verificationData, {
-      withCredentials: true
-    }).subscribe({
-      next: (response: any) => {
-        console.log('2FA verification successful:', response);
+    this.authService.verify2FA(request).subscribe({
+      next: () => {
+        console.log('2FA verification successful');
         this.isVerifying = false;
 
         setTimeout(() => {

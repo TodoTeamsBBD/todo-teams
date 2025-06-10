@@ -44,6 +44,10 @@ jobs:
       - name: Install dependencies
         run: npm i
 
+      - name: Prepare config
+        run: |
+          sed -i "s|__API_URL__|${{ secrets.API_URL }}|g" apps/client/config.json
+
       - name: Build Angular app
         run: npm run build
 

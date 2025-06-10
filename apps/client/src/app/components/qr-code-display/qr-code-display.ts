@@ -12,9 +12,4 @@ export class QrCodeDisplay {
   @Input() title: string = 'Scan QR Code';
   @Input() subtitle: string = 'Open Microsoft Authenticator and scan this code';
 
-  copied: boolean = false;
-
-  onImageError(): void {
-    console.error('Failed to load QR code image');
-  }
 }
