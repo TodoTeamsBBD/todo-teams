@@ -51,6 +51,7 @@ export interface UserState {
   userId?: string;
   verified2FA?: boolean;
   verified2FAsession?: boolean;
+  isAccessAdmin?: boolean;
 }
 
 export interface NavigationResult {

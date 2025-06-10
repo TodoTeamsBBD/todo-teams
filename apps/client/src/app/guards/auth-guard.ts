@@ -15,14 +15,34 @@ export const authGuard: CanActivateFn = (route, state) => {
       const isAuthenticated = response.userId !== undefined;
       const is2FAVerified = response.verified2FA === true;
       const is2FAVerifiedSession = response.verified2FAsession === true;
+      const isAccessAdmin = response.isAccessAdmin === true;
 
       // If both 2FA flags are true, user is fully authenticated
       if (isAuthenticated && is2FAVerified && is2FAVerifiedSession) {
         // Allow access to protected routes, redirect to dashboard if trying to access auth pages
-        if (state.url === '/login' || state.url === '/signup' || state.url === '/signup-2fa') {
+
+        // 🚫 Admin trying to access user dashboard
+        if (isAccessAdmin && state.url.startsWith('/dashboard')) {
+          router.navigate(['/accessadmin']);
+          return false;
+        }
+
+        // 🚫 User trying to access admin page
+        if (!isAccessAdmin && state.url.startsWith('/admin')) {
           router.navigate(['/dashboard']);
           return false;
         }
+
+        // ✅ Redirect from login/signup pages if already logged in
+        if (
+          state.url === '/login' ||
+          state.url === '/signup' ||
+          state.url === '/signup-2fa'
+        ) {
+          router.navigate([isAccessAdmin ? '/accessadmin' : '/dashboard']);
+          return false;
+        }
+
         return true;
       }
 
