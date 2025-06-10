@@ -4,6 +4,7 @@
       <ng-container *ngFor="let item of items; let last = last">
         <mat-list-item (click)="onItemClick(item)" class="team-item">
           <div class="list-item-wrapper">
+            <div class="team-id">{{item.id}}</div>
             <div class="team-info">
               <div class="team-name">{{ item.name }}</div>
               <div class="team-description">{{ item.description }}</div>
