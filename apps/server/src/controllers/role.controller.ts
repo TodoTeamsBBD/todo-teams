@@ -8,7 +8,7 @@ export const getAll = async (req: AuthenticatedRequest, res: Response) => {
   const userRole = await userRoleService.findUserRoleIfExists(req.user.id, rolesEnum.AccessAdministrator, null);
 
   if (!userRole) {
-    return res.status(403).send("Access denied: You do not have permission to perform this action." );
+    return res.status(403).json({ "message": "Access denied: You do not have permission to perform this action." });
   }
 
   const roles = await roleService.getRoles();
