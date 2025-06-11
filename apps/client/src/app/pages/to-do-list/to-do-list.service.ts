@@ -1,4 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { ConfigService } from '../../services/config';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CreateTodoRequest } from '../to-do-list/to-do-list';
@@ -18,9 +19,14 @@ export interface Todo {
   providedIn: 'root',
 })
 export class ToDoService {
-  private baseUrl = 'http://localhost:3000';
-
-  constructor(private http: HttpClient) {}
+  private baseUrl: string;
+    
+      constructor(
+          private http: HttpClient,
+          private configService: ConfigService,
+        ) {
+          this.baseUrl = this.configService.apiUrl;
+        }
 
   getTodosForTeam(
     teamId: number,
