@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ConfigService } from './config';
+
 import {
   TeamMember,
   MemberRole,
@@ -15,9 +17,14 @@ export interface TeamMembersResponse {
   providedIn: 'root',
 })
 export class UserRoleService {
-  private baseUrl = 'http://localhost:3000';
+  private baseUrl: string;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+      private http: HttpClient,
+      private configService: ConfigService,
+    ) {
+      this.baseUrl = this.configService.apiUrl;
+    }
 
   assignUserRole(userId: string, roleId: number, teamId: number) {
     return this.http.post(
