@@ -5,7 +5,6 @@ import { catchError } from 'rxjs/operators';
 import { ConfigService } from './config';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-
 export interface LoginRequest {
   email: string;
   password: string;
@@ -61,16 +60,8 @@ export interface NavigationResult {
   userState: UserState;
 }
 
-export interface AuthUser {
-  userId: string;
-  name: string;
-  email: string;
-  verified2FA: boolean;
-  verified2FAsession: boolean;
-}
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private apiUrl: string;
@@ -104,40 +95,31 @@ export class AuthService {
   }
 
   private post<T>(endpoint: string, body: any): Observable<T> {
-    return this.http.post<T>(`${this.apiUrl}/${endpoint}`, body, {
-      withCredentials: true
-    }).pipe(
-      catchError(this.handleError)
-    );
+    return this.http
+      .post<T>(`${this.apiUrl}/${endpoint}`, body, {
+        withCredentials: true,
+      })
+      .pipe(catchError(this.handleError));
   }
 
   private postText(endpoint: string, body: any): Observable<string> {
-    return this.http.post(`${this.apiUrl}/${endpoint}`, body, {
-      withCredentials: true,
-      responseType: 'text'
-    }).pipe(
-      catchError(this.handleError)
-    );
+    return this.http
+      .post(`${this.apiUrl}/${endpoint}`, body, {
+        withCredentials: true,
+        responseType: 'text',
+      })
+      .pipe(catchError(this.handleError));
   }
 
   getCurrentUserState(): Observable<UserState> {
     return this.http.get<UserState>(`${this.apiUrl}/auth/me`, {
-      withCredentials: true
+      withCredentials: true,
     });
   }
 
   fetchSignupQRCode(): Observable<{ qrCodeUrl: string }> {
-  return this.http.get<{ qrCodeUrl: string }>(`${this.apiUrl}/auth/signup/qr`, {
-    withCredentials: true
-  }).pipe(
-    catchError(this.handleError)
-  );
-  }
-
-  
-  getCurrentUser(): Observable<AuthUser> {
     return this.http
-      .get<AuthUser>(`${this.apiUrl}/auth/me`, {
+      .get<{ qrCodeUrl: string }>(`${this.apiUrl}/auth/signup/qr`, {
         withCredentials: true,
       })
       .pipe(catchError(this.handleError));
@@ -151,15 +133,16 @@ export class AuthService {
       errorMessage = error.error.message;
     } else {
       // Server-side error
-      errorMessage = typeof error.error === 'string' ? error.error : error.error.message;
+      errorMessage =
+        typeof error.error === 'string' ? error.error : error.error.message;
     }
 
     this.snackBar.open(errorMessage, 'Close', {
       duration: 5000,
       verticalPosition: 'top',
-      panelClass: ['error-snackbar']
+      panelClass: ['error-snackbar'],
     });
 
     return throwError(() => errorMessage);
-  }
+  };
 }

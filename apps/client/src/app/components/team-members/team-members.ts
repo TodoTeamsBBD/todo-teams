@@ -83,6 +83,9 @@ export class TeamMembers {
   }
 
   saveMember(newMember: TeamMember) {
+    if (newMember.userRoleId !== null ){
+      alert("User is already a team member")
+    }
     this.userRoleService
       .assignUserRole(newMember.id, ROLE_ENUM.TeamMember, this.teamId)
       .subscribe({
