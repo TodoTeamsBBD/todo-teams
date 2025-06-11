@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { CreateTodoRequest } from '../to-do-list/to-do-list';
 
 export interface Todo {
-  //   id: number;
+  id: number;
   title: string;
   description?: string;
   created_by: string;
@@ -57,7 +57,6 @@ export class ToDoService {
       title: string;
       description: string;
       assignedTo: string;
-      completed: boolean;
     }
   ): Observable<Todo> {
     return this.http.put<Todo>(
@@ -66,9 +65,15 @@ export class ToDoService {
         title: data.title,
         description: data.description,
         assignedTo: data.assignedTo,
-        completed: data.completed.toString(), 
       },
       { withCredentials: true }
     );
+  }
+
+  updateTodoStatus(
+    id: number,
+    payload: { completed: string }
+  ): Observable<Todo> {
+    return this.http.put<Todo>(`${this.baseUrl}/api/todos/${id}`, payload);
   }
 }

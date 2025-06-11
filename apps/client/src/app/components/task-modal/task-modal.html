@@ -15,12 +15,13 @@
 
     <mat-form-field style="width: 100%">
       <mat-label>Task Description</mat-label>
-      <textarea
+      <input
         matInput
         [(ngModel)]="task.description"
         placeholder="Enter task description"
         rows="4"
-      ></textarea>
+        required
+      />
     </mat-form-field>
 
     <mat-form-field
@@ -32,8 +33,9 @@
         [(ngModel)]="task.assigned_to"
         panelClass="custom-select-panel"
         [disabled]="!canEditAssignedTo"
+        required
       >
-        <mat-option *ngFor="let member of teamMembers" [value]="member">
+        <mat-option *ngFor="let member of teamMembers" [value]="member" >
           {{ member }}
         </mat-option>
       </mat-select>

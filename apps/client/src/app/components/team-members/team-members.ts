@@ -83,11 +83,14 @@ export class TeamMembers {
   }
 
   saveMember(newMember: TeamMember) {
+    if (newMember.userRoleId !== null ){
+      alert("User is already a team member")
+    }
     this.userRoleService
       .assignUserRole(newMember.id, ROLE_ENUM.TeamMember, this.teamId)
       .subscribe({
         next: () => {
-          console.log('User role assigned as Team Member');
+          alert('User role assigned as Team Member');
           this.members.push(newMember);
         },
         error: (err) => {
@@ -103,8 +106,7 @@ export class TeamMembers {
     this.userService.getAvailableUsers().subscribe({
       next: (response) => {
         this.availableMembers = response;
-        console.log('Users');
-        console.log(response);
+       
       },
       error: (error) => {
         console.error('Failed to load available team members', error);
@@ -125,13 +127,12 @@ export class TeamMembers {
 
   confirmDeleteMember() {
     if (this.selectedMember && this.selectedMember.userRoleId !== undefined) {
-      console.log('member to delete');
-      console.log(this.selectedMember);
+     
       this.userRoleService
         .removeTeamMember(this.selectedMember.userRoleId)
         .subscribe({
           next: () => {
-            console.log('Member removed successfully');
+            alert('Member removed successfully');
             this.members = this.members.filter(
               (m) => m !== this.selectedMember
             );
