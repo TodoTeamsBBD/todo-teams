@@ -117,12 +117,10 @@ export class ToDoList implements OnInit, AfterViewInit {
     this.authService.getCurrentUserState().subscribe({
       next: (user) => {
         this.currentUser = user;
-        console.log('Logged in user:', this.currentUser);
 
         this.route.queryParams.subscribe((params) => {
           const param = params['teamId'];
           this.teamId = param;
-          console.log('Team ID from query:', this.teamId);
         });
 
         this.loadTodos();
@@ -157,8 +155,7 @@ export class ToDoList implements OnInit, AfterViewInit {
       .subscribe({
         next: (data) => {
           this.tasks = data;
-          console.log('Tasks ===>');
-          console.log(this.tasks);
+          
           this.loadError = false;
           this.applyFilters();
         },
@@ -178,9 +175,7 @@ export class ToDoList implements OnInit, AfterViewInit {
     this.userRoleService.getUsersByTeam(this.teamId).subscribe({
       next: (response) => {
         this.teamMembers = response.members;
-        console.log('team');
-        let members = response.members;
-        console.log(members);
+      
       },
       error: (error) => {
         console.error('Failed to load team members', error);
@@ -231,7 +226,6 @@ export class ToDoList implements OnInit, AfterViewInit {
 
 
   submitTask(task: any): void {
-    console.log('Submitting task:', task);
 
     const newTodoRequestBody = {
       title: task.title,
@@ -268,7 +262,6 @@ export class ToDoList implements OnInit, AfterViewInit {
     } else {
       this.todoService.createTodo(newTodoRequestBody).subscribe({
         next: (createdTodo) => {
-          console.log('Todo created:', createdTodo);
           this.tasks.push({
             ...task,
             created_by: this.currentUser.userId,
@@ -318,7 +311,6 @@ export class ToDoList implements OnInit, AfterViewInit {
       if (actualIndex !== -1) {
         this.todoService.deleteTodo(this.taskToDelete.id).subscribe({
           next: () => {
-            console.log('Todo deleted');
             this.tasks.splice(actualIndex, 1);
             this.applyFilters();
           },
@@ -347,14 +339,12 @@ export class ToDoList implements OnInit, AfterViewInit {
   // }
 
   toggleCompletion(task: Task): void {
-    console.log('task id ' + task.id);
-    const completed = task.completed_at ? 'false' : 'true'; // Toggle the current state
+    const completed = task.completed_at ? 'false' : 'true'; 
 
     this.todoService.updateTodoStatus(task.id, { completed }).subscribe({
       next: (updatedTask) => {
         task.completed_at = completed === 'true' ? new Date() : null;
         this.applyFilters();
-        console.log('Task completion toggled:', updatedTask);
       },
       error: (err) => {
         console.error('Failed to toggle completion:', err);
@@ -378,7 +368,6 @@ export class ToDoList implements OnInit, AfterViewInit {
 
   isCurrentUserTeamLead(): boolean {
     let curr = this.currentUser.userId;
-    // console.log(curr)
 
     const currentMember = this.teamMembers.find((m) => m.name === curr);
     return currentMember?.role === 'TeamLead';
