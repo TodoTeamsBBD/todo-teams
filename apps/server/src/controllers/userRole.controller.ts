@@ -160,3 +160,56 @@ export const remove = async (req: AuthenticatedRequest, res: Response) => {
 
   return res.status(204).json({ "message": "User successfully removed from team" });
 };
+
+export const getUsersByTeam = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const teamId = Number(req.params["teamId"]);
+
+  if (isNaN(teamId)) {
+    return res.status(400).json({ error: "A valid team ID is required" });
+  }
+
+  const hasAccess =
+    (await userRoleService.findUserRoleIfExists(
+      req.user.id,
+      rolesEnum.TeamLead,
+      teamId
+    )) ||
+    (await userRoleService.findUserRoleIfExists(
+      req.user.id,
+      rolesEnum.AccessAdministrator,
+      null
+    )) ||
+  (await userRoleService.findUserRoleIfExists(
+      req.user.id,
+      rolesEnum.TeamMember,
+      teamId
+    )) 
+
+  if (!hasAccess) {
+    return res
+      .status(403)
+      .json({
+        error: "Access denied: You do not have permission to view this team",
+      });
+  }
+
+  try {
+    const teamMembers = await userRoleService.getUsersByTeamWithRoles(teamId);
+
+    const formatted = teamMembers.map((member) => ({
+      id: member.users.id,
+      name: member.users.username,
+      role: member.roles.name,
+      userRoleId: member.id,
+    }));
+
+    return res.status(200).json({ teamId, members: formatted });
+  } catch (err) {
+    console.error("Error retrieving team users:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+

@@ -5,7 +5,12 @@
 
     <mat-form-field style="width: 100%">
       <mat-label>Task Title</mat-label>
-      <input matInput [(ngModel)]="task.title" placeholder="Enter task title" />
+      <input
+        matInput
+        [(ngModel)]="task.title"
+        placeholder="Enter task title"
+        required
+      />
     </mat-form-field>
 
     <mat-form-field style="width: 100%">
@@ -18,11 +23,15 @@
       ></textarea>
     </mat-form-field>
 
-    <mat-form-field style="width: 100%">
+    <mat-form-field
+      style="width: 100%"
+      [class.disabled-select]="!canEditAssignedTo"
+    >
       <mat-label>Assign To</mat-label>
       <mat-select
-        [(ngModel)]="task.assignedTo"
+        [(ngModel)]="task.assigned_to"
         panelClass="custom-select-panel"
+        [disabled]="!canEditAssignedTo"
       >
         <mat-option *ngFor="let member of teamMembers" [value]="member">
           {{ member }}

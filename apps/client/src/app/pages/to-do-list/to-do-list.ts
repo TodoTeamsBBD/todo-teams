@@ -1,8 +1,10 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { TeamMembers } from '../../components/team-members/team-members';
 import { TaskModal } from '../../components/task-modal/task-modal';
 import { TaskDetailsModal } from '../../components/task-details-modal/task-details-modal';
+import { DeleteModal } from '../../components/delete-modal/delete-modal';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatTableModule } from '@angular/material/table';
@@ -13,16 +15,35 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { ToDoService, Todo } from './to-do-list.service';
+import { AuthService, AuthUser } from '../../services/authservice';
+import { ActivatedRoute } from '@angular/router';
+import { UserRoleService } from '../../services/user-role-service';
+import {
+  TeamMember,
+  MemberRole,
+} from '../../components/team-members/team-members';
 
 interface Task {
+  // id: number;
   title: string;
   description?: string;
-  createdBy?: string;
+  created_by?: string;
+  assigned_to: string;
+  team_id?: number;
+  created_at?: Date;
+  completed_at?: Date | null;
+  // completed: boolean;
+}
+
+
+export interface CreateTodoRequest {
+  title: string;
+  description: string;
   assignedTo: string;
-  teamId?: string;
-  createdAt?: Date;
-  completedAt?: Date | null;
-  completed: boolean;
+  teamId: number;
 }
 
 @Component({
@@ -30,8 +51,10 @@ interface Task {
   imports: [
     CommonModule,
     FormsModule,
+    TeamMembers,
     TaskModal,
     TaskDetailsModal,
+    DeleteModal,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -40,72 +63,49 @@ interface Task {
     MatPaginatorModule,
     MatCheckboxModule,
     MatIconModule,
+    MatSidenavModule,
+    MatToolbarModule,
   ],
   templateUrl: './to-do-list.html',
   styleUrls: ['./to-do-list.css'],
 })
 export class ToDoList implements OnInit, AfterViewInit {
-  tasks: Task[] = [
-    {
-      title: 'Task 1',
-      description: 'Task1 description',
-      createdBy: 'lead user',
-      assignedTo: 'Ray',
-      teamId: '011',
-      createdAt: new Date(),
-      completedAt: null,
-      completed: false,
-    },
-    {
-      title: 'Task 2',
-      description: 'Task2 description',
-      createdBy: 'lead user',
-      assignedTo: 'Octovia',
-      teamId: '012',
-      createdAt: new Date(),
-      completedAt: null,
-      completed: false,
-    },
-    {
-      title: 'Task 3',
-      description: 'Task3 description',
-      createdBy: 'lead user',
-      assignedTo: 'Shaz',
-      teamId: '013',
-      createdAt: new Date(),
-      completedAt: null,
-      completed: false,
-    },
-  ];
+  currentUser!: AuthUser;
 
-  showMyTasks: boolean = false;
-  showCompletedTasks: boolean = false;
-  filteredTasks: Task[] = [];
+  constructor(
+    private todoService: ToDoService,
+    private userRoleService: UserRoleService,
+    private authService: AuthService,
+    private route: ActivatedRoute
+  ) {}
 
-  showTaskModal = false;
-  isEditMode = false;
-  editIndex: number | null = null;
-
-  deleteIndex: number | null = null;
-  taskToDelete: any = null;
-  // taskToDelete: Task | null = null;
-  selectedTask: Task | null = null;
-
-  showDeleteModal = false;
+  tasks: Todo[] = [];
 
   taskForm = {
     title: '',
     description: '',
-    assignedTo: '',
+    assigned_to: '',
   };
 
-  teamMembers = ['Ray', 'Octovia', 'Shaz'];
-
-  currentUser = 'Ray'; // Example logged-in user
+  sideNavOpened: boolean = true;
+  showMyTasks: boolean = false;
+  showCompletedTasks: boolean = false;
+  filteredTasks: Task[] = [];
+  showTaskModal: boolean = false;
+  isEditMode: boolean = false;
+  editIndex: number | null = null;
+  deleteIndex: number | null = null;
+  taskToDelete: any = null;
+  selectedTask: Task | null = null;
+  showDeleteModal: boolean = false;
+  completed: boolean = false;
+  teamId!: number;
+  loadError: boolean = false;
+  teamMembers: TeamMember[] = [];
 
   displayedColumns: string[] = [
     'title',
-    'assignedTo',
+    'assigned_to',
     'edit',
     'delete',
     'completed',
@@ -115,18 +115,87 @@ export class ToDoList implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   ngOnInit(): void {
-    this.applyFilters();
+    this.authService.getCurrentUser().subscribe({
+      next: (user) => {
+        this.currentUser = user;
+        console.log('Logged in user:', this.currentUser);
+
+        this.route.queryParams.subscribe((params) => {
+          const param = params['teamId'];
+          this.teamId = param;
+          console.log('Team ID from query:', this.teamId);
+        });
+
+        this.loadTodos();
+        this.loadTeamMembers();
+      },
+      error: (err) => {
+        console.error('Failed to fetch current user:', err);
+      },
+    });
   }
 
   ngAfterViewInit(): void {
     this.pagedTasks.paginator = this.paginator;
   }
 
+  get teamMemberNames(): string[] {
+    return this.teamMembers.map((member) => member.name);
+  }
+
+  loadTodos(): void {
+    if (this.teamId === null) {
+      console.error('Team ID is not available. Cannot load todos.');
+      return;
+    }
+
+    const teamId = this.teamId;
+    const usersToDos = this.showMyTasks;
+    const completedToDos = this.showCompletedTasks ? true : null;
+
+    this.todoService
+      .getTodosForTeam(teamId, usersToDos, completedToDos)
+      .subscribe({
+        next: (data) => {
+          this.tasks = data;
+          console.log('Tasks ===>');
+          console.log(this.tasks);
+          this.loadError = false;
+          this.applyFilters();
+        },
+        error: (err) => {
+          this.loadError = true;
+          console.error('Failed to load todos:', err);
+        },
+      });
+  }
+
+  loadTeamMembers(): void {
+    if (this.teamId === null) {
+      console.error('Team ID is not available. Cannot load team members.');
+      return;
+    }
+
+    this.userRoleService.getUsersByTeam(this.teamId).subscribe({
+      next: (response) => {
+        this.teamMembers = response.members;
+        console.log('team');
+        let members = response.members;
+        console.log(members);
+      },
+      error: (error) => {
+        console.error('Failed to load team members', error);
+      },
+    });
+  }
+
   applyFilters(): void {
     this.filteredTasks = this.tasks.filter((task) => {
       const matchesUser =
-        !this.showMyTasks || task.assignedTo === this.currentUser;
-      const matchesCompleted = !this.showCompletedTasks || task.completed;
+        !this.showMyTasks || task.assigned_to === this.currentUser.name;
+      const matchesCompleted = !this.showCompletedTasks;
+      // const matchesCompleted = !this.showCompletedTasks || task.completed;
+
       return matchesUser && matchesCompleted;
     });
 
@@ -144,7 +213,7 @@ export class ToDoList implements OnInit, AfterViewInit {
   }
 
   createTask(): void {
-    this.taskForm = { title: '', description: '', assignedTo: '' };
+    this.taskForm = { title: '', description: '', assigned_to: '' };
     this.isEditMode = false;
     this.editIndex = null;
     this.showTaskModal = true;
@@ -152,8 +221,8 @@ export class ToDoList implements OnInit, AfterViewInit {
   }
 
   editTask(index: number): void {
-    const { title, description = '', assignedTo } = this.tasks[index];
-    this.taskForm = { title, description, assignedTo };
+    const { title, description = '', assigned_to } = this.tasks[index];
+    this.taskForm = { title, description, assigned_to };
     this.isEditMode = true;
     this.editIndex = index;
     this.showTaskModal = true;
@@ -161,25 +230,75 @@ export class ToDoList implements OnInit, AfterViewInit {
   }
 
   submitTask(task: any): void {
+    const newTodoRequestBody = {
+      title: task.title,
+      description: task.description,
+      assignedTo: this.getUserIdByName(task.assigned_to),
+      teamId: this.teamId,
+    };
+
     if (this.isEditMode && this.editIndex !== null) {
-      this.tasks[this.editIndex] = { ...this.tasks[this.editIndex], ...task };
-    } else {
-      this.tasks.push({
+      // this.todoService
+      //   .updateTodo(8, {
+      //     title: task.title,
+      //     description: task.description,
+      //     assignedTo: this.getUserIdByName(task.assigned_to),
+      //     completed: task.completed,
+      //   })
+      //   .subscribe({
+      //     next: (updatedTodo) => {
+      //       console.log('Todo updated:', updatedTodo);
+      //       // Update UI or close modal
+      this.tasks[this.editIndex] = {
+        ...this.tasks[this.editIndex],
         ...task,
-        createdBy: this.currentUser,
-        createdAt: new Date(),
-        completedAt: null,
-        completed: false,
+      };
+      this.applyFilters();
+      this.closeModal();
+      //   },
+      //   error: (err) => {
+      //     console.error('Update failed:', err);
+      //     // Show an error message
+      //   },
+      // });
+    } else {
+      this.todoService.createTodo(newTodoRequestBody).subscribe({
+        next: (createdTodo) => {
+          console.log('Todo created:', createdTodo);
+          this.tasks.push({
+            ...task,
+            created_by: this.currentUser.userId,
+            assigned_to: this.currentUser.userId,
+            team_id: this.teamId,
+            created_at: new Date(),
+            completed_at: null,
+          });
+          this.applyFilters();
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Error creating todo:', err);
+          alert('Failed to create task. You may not have permission.');
+        },
       });
     }
-    this.applyFilters();
-    this.closeModal();
+  }
+
+  getUserIdByName(name: string): string {
+    const member = this.teamMembers.find((m) => m.name === name);
+    if (!member) throw new Error('Assigned user not found');
+    return (member as any).id;
+  }
+
+  getUserNameById(userId: string): string {
+    const member = this.teamMembers.find((m) => m.id === userId);
+    return member ? member.name : 'Unknown';
   }
 
   closeModal(): void {
     this.showTaskModal = false;
     this.editIndex = null;
-    this.taskForm = { title: '', description: '', assignedTo: '' };
+    this.taskForm = { title: '', description: '', assigned_to: '' };
     document.body.classList.remove('modal-open');
   }
 
@@ -193,7 +312,16 @@ export class ToDoList implements OnInit, AfterViewInit {
     if (this.taskToDelete) {
       const actualIndex = this.tasks.indexOf(this.taskToDelete);
       if (actualIndex !== -1) {
-        this.tasks.splice(actualIndex, 1);
+        this.todoService.deleteTodo(this.taskToDelete.id).subscribe({
+          next: () => {
+            console.log('Todo deleted');
+            this.tasks.splice(actualIndex, 1);
+            this.applyFilters();
+          },
+          error: (err) => {
+            console.error('Error deleting todo:', err);
+          },
+        });
       }
     }
     this.taskToDelete = null;
@@ -209,7 +337,39 @@ export class ToDoList implements OnInit, AfterViewInit {
     document.body.classList.remove('modal-open');
   }
 
-  toggleCompletion(index: number) {
-    this.tasks[index].completed = !this.tasks[index].completed;
+  // toggleCompletion(index: number) {
+  //   this.tasks[index].completed = !this.tasks[index].completed;
+  // }
+
+  getCurrentUserRole(): MemberRole | null {
+    const member = this.teamMembers.find(
+      (m) => m.name === this.currentUser.name
+    );
+    return member ? member.role : null;
+  }
+
+  canEditOrDelete(task: Task): boolean {
+    const role = this.getCurrentUserRole();
+    if (role === 'TeamLead') return true;
+
+    return task.assigned_to === this.currentUser.name;
+  }
+
+  // isCurrentUserTeamLead(): boolean {
+  //   let curr = this.currentUser.name;
+  //   console.log(curr);
+
+  //   const currentMember = this.teamMembers.find((m) => m.name === curr);
+  //   console.log('Current member');
+  //   console.log(currentMember);
+  //   return currentMember?.role === 'TeamLead';
+  // }
+
+  canToggleComplete(task: Task): boolean {
+    return this.canEditOrDelete(task);
+  }
+
+  togglePanel(): void {
+    this.sideNavOpened = !this.sideNavOpened;
   }
 }

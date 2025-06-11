@@ -61,6 +61,14 @@ export interface NavigationResult {
   userState: UserState;
 }
 
+export interface AuthUser {
+  userId: string;
+  name: string;
+  email: string;
+  verified2FA: boolean;
+  verified2FAsession: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -124,6 +132,15 @@ export class AuthService {
   }).pipe(
     catchError(this.handleError)
   );
+  }
+
+  
+  getCurrentUser(): Observable<AuthUser> {
+    return this.http
+      .get<AuthUser>(`${this.apiUrl}/auth/me`, {
+        withCredentials: true,
+      })
+      .pipe(catchError(this.handleError));
   }
 
   private handleError = (error: HttpErrorResponse) => {

@@ -1,0 +1,30 @@
+<section class="modal-backdrop" *ngIf="show">
+  <section class="modal">
+    <h2>Add New Member</h2>
+    <p>Enter the new team member.</p>
+
+    <mat-form-field style="width: 100%">
+      <mat-label>Member Name</mat-label>
+      <input
+        type="text"
+        matInput
+        [(ngModel)]="name"
+        (ngModelChange)="filterNames()"
+        [matAutocomplete]="auto"
+        placeholder="Search member"
+      />
+      <mat-autocomplete #auto="matAutocomplete" class="custom-select-panel">
+        <mat-option *ngFor="let n of filteredNames" [value]="n.name">
+          {{ n.name }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+
+    <section class="modal-actions">
+      <button class="cancel" (click)="onClose()">Cancel</button>
+      <button class="create" (click)="onSave()">
+        Add Member
+      </button>
+    </section>
+  </section>
+</section>

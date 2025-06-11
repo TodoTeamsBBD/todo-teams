@@ -76,3 +76,25 @@ export const isAccessAdmin = (userId: string) => prisma.user_roles.findFirst({
     role_id: rolesEnum.AccessAdministrator
   }
 });
+
+export const getUsersByTeamWithRoles = async (teamId: number) => {
+  if (isNaN(teamId)) return [];
+
+  return await prisma.user_roles.findMany({
+    where: { team_id: teamId },
+    select: {
+      id: true,
+      users: {
+        select: {
+          id: true,
+          username: true,
+        },
+      },
+      roles: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+};
