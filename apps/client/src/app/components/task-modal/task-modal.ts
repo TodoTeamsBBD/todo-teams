@@ -23,16 +23,22 @@ import { TeamMember, MemberRole } from '../team-members/team-members';
 export class TaskModal {
   @Input() show = false;
   @Input() isEditMode = false;
-  @Input() task = { title: '', description: '', assigned_to: '' };
+  @Input() task = { id: 0, title: '', description: '', assigned_to: '' };
   @Input() teamMembers: string[] = [];
-  @Input() canEditAssignedTo: boolean = true;
+  @Input() canEditAssignedTo: boolean = !this.isEditMode;
+//   get canEditAssignedTo(): boolean {
+//   return !this.isEditMode;
+// }
+
 
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<any>();
 
   onSave() {
-    if (this.task.title && this.task.assigned_to) {
+    if (this.task.title && this.task.description && this.task.assigned_to ) {
       this.save.emit(this.task);
+    } else {
+      alert('Please fill all fields.');
     }
   }
 

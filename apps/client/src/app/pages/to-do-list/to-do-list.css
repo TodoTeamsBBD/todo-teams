@@ -106,7 +106,6 @@ button[disabled] mat-icon {
 /*  */
 .sidenav-container {
   margin-top: 50px;
-
   height: 100vh;
 }
 
@@ -128,6 +127,12 @@ button[disabled] mat-icon {
   justify-content: flex-end;
   padding: 0;
 }
+
+.completed {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
 
 @media screen and (max-width: 768px) {
   .team-sidenav {
