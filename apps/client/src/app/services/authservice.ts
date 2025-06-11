@@ -3,6 +3,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ConfigService } from './config';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
 
 export interface LoginRequest {
   email: string;
@@ -59,6 +61,14 @@ export interface NavigationResult {
   userState: UserState;
 }
 
+export interface AuthUser {
+  userId: string;
+  name: string;
+  email: string;
+  verified2FA: boolean;
+  verified2FAsession: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -67,7 +77,8 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private snackBar: MatSnackBar
   ) {
     this.apiUrl = this.configService.apiUrl;
   }
@@ -112,9 +123,7 @@ export class AuthService {
   getCurrentUserState(): Observable<UserState> {
     return this.http.get<UserState>(`${this.apiUrl}/auth/me`, {
       withCredentials: true
-    }).pipe(
-      catchError(this.handleError)
-    );
+    });
   }
 
   fetchSignupQRCode(): Observable<{ qrCodeUrl: string }> {
@@ -123,9 +132,18 @@ export class AuthService {
   }).pipe(
     catchError(this.handleError)
   );
-}
+  }
 
-  private handleError(error: HttpErrorResponse) {
+  
+  getCurrentUser(): Observable<AuthUser> {
+    return this.http
+      .get<AuthUser>(`${this.apiUrl}/auth/me`, {
+        withCredentials: true,
+      })
+      .pipe(catchError(this.handleError));
+  }
+
+  private handleError = (error: HttpErrorResponse) => {
     let errorMessage = 'An unknown error occurred';
 
     if (error.error instanceof ErrorEvent) {
@@ -133,8 +151,14 @@ export class AuthService {
       errorMessage = error.error.message;
     } else {
       // Server-side error
-      errorMessage = error.error || error.message;
+      errorMessage = typeof error.error === 'string' ? error.error : error.error.message;
     }
+
+    this.snackBar.open(errorMessage, 'Close', {
+      duration: 5000,
+      verticalPosition: 'top',
+      panelClass: ['error-snackbar']
+    });
 
     return throwError(() => errorMessage);
   }

@@ -14,3 +14,7 @@ body.modal-open {
   overflow: hidden;
 }
 
+.error-snackbar {
+  background-color: white !important;
+  color: black !important;
+}

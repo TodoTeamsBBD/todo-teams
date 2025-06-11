@@ -6,6 +6,7 @@ const router = Router();
 
 router.get('/', requireAuth, controller.getAllPaginated);
 router.get('/user', requireAuth, controller.getTeamsForUser);
+router.get('/stats/:id', requireAuth, controller.getStats);
 router.post('/', requireAuth, controller.create);
 
 export default router;

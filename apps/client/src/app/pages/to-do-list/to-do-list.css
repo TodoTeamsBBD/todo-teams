@@ -1,7 +1,7 @@
 @import "../../styles/shared/_common.css";
 
 .container {
-  /* flex: 1; */
+  /* margin-top: 250px; */
   padding: 2rem;
   text-align: center;
 }
@@ -82,6 +82,17 @@ td {
   padding: 0 10px;
 }
 
+button[disabled],
+mat-checkbox[disabled] {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+button[disabled] mat-icon {
+  color: gray;
+}
+
 @media screen and (max-width: 768px) {
   .layout-container {
     flex-direction: column;
@@ -92,3 +103,34 @@ td {
   }
 }
 
+/*  */
+.sidenav-container {
+  margin-top: 50px;
+
+  height: 100vh;
+}
+
+.team-sidenav {
+  width: 25%;
+  background: #f5f5f5;
+  padding: 1rem;
+}
+
+.menu-btn {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1000;
+}
+
+.mat-toolbar-row,
+.mat-toolbar-single-row {
+  justify-content: flex-end;
+  padding: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .team-sidenav {
+    width: 200px;
+  }
+}

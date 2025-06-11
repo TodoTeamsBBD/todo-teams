@@ -7,6 +7,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CreateTeamForm } from '../../components/create-team-form/create-team-form';
 import { ParticipantSearchBar } from '../../components/participant-search-bar/participant-search-bar';
 import { TeamService, UserTeam } from '../../services/teamservice'; // Adjust path as needed
+import { Router } from '@angular/router';
 
 interface TeamItem {
   id: number;
@@ -30,7 +31,8 @@ export class DashboardPage implements OnInit {
 
   constructor(
     private dialog: MatDialog,
-    private teamService: TeamService
+    private teamService: TeamService,
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -65,6 +67,11 @@ export class DashboardPage implements OnInit {
     console.log('Selected team:', item);
     // Add navigation logic here if needed
     // this.router.navigate(['/team', item.id]);
+    this.router.navigate(['/to-do-list'], {
+      queryParams: {
+        teamId: item.id,
+      },
+    });
   }
 
   addTeam() {

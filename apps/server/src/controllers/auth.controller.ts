@@ -17,21 +17,21 @@ export const signup = async (req: Request, res: Response) => {
     const password = sanitizeInput(rawPassword);
 
     if (!name || !email || !password) {
-        return res.status(400).send('Name, email and password are required');
+        return res.status(400).json({ "message": "Name, email and password are required" });
     }
 
     if (!isValidEmail(email)) {
-        return res.status(400).send("Please enter a valid email");
+        return res.status(400).json({ "message": "Please enter a valid email" });
     }
     if (!isValidPassword(password)) {
-        return res.status(400).send("Please enter a valid password (minimum length 8)");
+        return res.status(400).json({ "message": "Please enter a valid password (minimum length 8)" });
     }
     if (!isValidUsername(name)) {
-        return res.status(400).send("Please enter a valid name");
+        return res.status(400).json({ "message": "Please enter a valid name" });
     }
 
     if (await userService.getUserByEmail(email)) {
-        return res.status(409).send("Email already exists");
+        return res.status(409).json({ "message": "Email already exists" });
     }
     
     const passwordHash = await argon2.hash(password, {
@@ -62,25 +62,25 @@ export const signup2FA = async (req: Request, res: Response) => {
     const code2FA = req.body?.code2FA;
 
     if (isNaN(code2FA)) {
-        return res.status(400).send('Please enter a valid 2FA code');
+        return res.status(400).json({ "message": "Please enter a valid 2FA code" });
     }
 
     if (!token) {
-        return res.status(401).send('Authentication token missing');
+        return res.status(401).json({ "message": "Authentication token missing" });
     }
     
     const payload = verifyJwt(token);
     if (!payload || !payload.userId) {
-        return res.status(401).send('Invalid or expired authentication token');
+        return res.status(401).json({ "message": "Invalid or expired authentication token" });
     }
     
     let user = await userService.getUserById(payload.userId);
     if (!user) {
-        return res.status(404).send('User not found');
+        return res.status(404).json({ "message": "User not found" });
     }
 
     if (user.two_factor_verified) {
-        return res.status(403).send("Two factor authentication has already been enabled");
+        return res.status(403).json({ "message": "Two factor authentication has already been enabled" });
     }
 
     const verified = speakeasy.totp.verify({
@@ -91,7 +91,7 @@ export const signup2FA = async (req: Request, res: Response) => {
     });
 
     if (!verified) 
-        return res.status(401).send("Invalid 2FA token");
+        return res.status(401).json({ "message": "Invalid 2FA token" });
 
     await userService.set2FAverified(user.id);
 
@@ -115,21 +115,21 @@ export const getQR = async (req: Request, res: Response) => {
     let token = req.cookies['access_token'];
 
     if (!token) {
-        return res.status(401).send('Authentication token missing');
+        return res.status(401).json({ "message": "Authentication token missing" });
     }
     
     const payload = verifyJwt(token);
     if (!payload || !payload.userId) {
-        return res.status(401).send('Invalid or expired authentication token');
+        return res.status(401).json({ "message": "Invalid or expired authentication token" });
     }
     
     let user = await userService.getUserById(payload.userId);
     if (!user) {
-        return res.status(404).send('User not found');
+        return res.status(404).json({ "message": "User not found" });
     }
 
     if (user.two_factor_verified) {
-        return res.status(403).send("Two factor authentication has already been enabled");
+        return res.status(403).json({ "message": "Two factor authentication has already been enabled" });
     }
 
     const otpauthUrl = speakeasy.otpauthURL({
@@ -152,20 +152,20 @@ export const login = async (req: Request, res: Response) => {
     const password = sanitizeInput(rawPassword);
 
     if (!isValidEmail(email)) {
-        return res.status(400).send("Please enter a valid email");
+        return res.status(400).json({ "message": "Please enter a valid email" });
     }
     if (!isValidPassword(password)) {
-        return res.status(400).send("Please enter a valid password (minimum length 8)");
+        return res.status(400).json({ "message": "Please enter a valid password (minimum length 8)" });
     }
 
     const user = await userService.getUserByEmail(email);
     if (!user) {
-        return res.status(401).send("Email or password is incorrect");
+        return res.status(401).json({ "message": "Email or password is incorrect" });
     }
 
     const valid = await argon2.verify(user.password_hash, password);
     if (!valid) {
-        return res.status(401).send("Email or password is incorrect");
+        return res.status(401).json({ "message": "Email or password is incorrect" });
     }
 
     if (!user.two_factor_verified) {
@@ -206,25 +206,25 @@ export const login2FA = async (req: Request, res: Response) => {
     const code2FA = req.body?.code2FA;
 
     if (isNaN(code2FA)) {
-        return res.status(400).send('Please enter a valid 2FA code');
+        return res.status(400).json({ "message": "Please enter a valid 2FA code" });
     }
     
     if (!token) {
-        return res.status(401).send('Authentication token missing');
+        return res.status(401).json({ "message": "Authentication token missing" });
     }
     
     const payload = verifyJwt(token);
     if (!payload || !payload.userId) {
-        return res.status(401).send('Invalid or expired authentication token');
+        return res.status(401).json({ "message": "Invalid or expired authentication token" });
     }
     
     let user = await userService.getUserById(payload.userId);
     if (!user) {
-        return res.status(404).send('User not found');
+        return res.status(404).json({ "message": "User not found" });
     }
 
     if (!user.two_factor_verified) {
-        return res.status(403).send("Two factor authentication has not been enabled yet");
+        return res.status(403).json({ "message": "Two factor authentication has not been enabled yet" });
     }
 
     const verified = speakeasy.totp.verify({
@@ -235,7 +235,7 @@ export const login2FA = async (req: Request, res: Response) => {
     });
 
     if (!verified) 
-        return res.status(401).send("Invalid 2FA token");
+        return res.status(401).json({ "message": "Invalid 2FA token" });
 
     const isAccessAdmin = await userRoleService.isAccessAdmin(user.id);
 
@@ -261,19 +261,19 @@ export const logout = (_: Request, res: Response) => {
         secure: true,
         sameSite: 'strict',
     });
-    return res.send('Logged out successfully');
+    return res.json({ "message": "Logged out successfully" });
 };
 
 
 export const getUserDetails = async (req: Request, res: Response) => {
     const token = req.cookies['access_token'];
     if (!token) {
-        return res.status(401).send('Authentication token missing');
+        return res.status(401).json({ "message": "Authentication token missing" });
     }
     
     const payload = verifyJwt(token);
     if (!payload || !payload.userId) {
-        return res.status(403).send('Invalid or expired token');
+        return res.status(403).json({ "message": "Invalid or expired token" });
     }
 
     return res.status(200).json({

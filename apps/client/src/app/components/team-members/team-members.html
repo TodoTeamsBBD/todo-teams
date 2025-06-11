@@ -1,0 +1,52 @@
+<section class="header">
+  <h3>Team Members</h3>
+  <section class="actions">
+    <button class="add-button" (click)="openAddMemberModal()">
+      + Add member
+    </button>
+    <input
+      type="text"
+      [(ngModel)]="searchText"
+      placeholder="Search members"
+      class="search-input"
+    />
+  </section>
+</section>
+
+<section class="member-list">
+  <section class="member" *ngFor="let member of filteredMembers; let i = index">
+    <section class="member-info">
+      <section class="avatar">{{ getInitials(member.name) }}</section>
+      <section class="info">
+        <section class="name">{{ member.name }}</section>
+        <section class="role">{{ member.role }}</section>
+      </section>
+    </section>
+
+    <section class="member-actions">
+      <button
+        mat-icon-button
+        (click)="openDeleteMemberModal(i)"
+        aria-label="Delete member"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </section>
+  </section>
+</section>
+
+<app-member-modal
+  [show]="showMemberModal"
+  [availableMembers]="availableMembers"
+  (save)="saveMember($event)"
+  (close)="closeMemberModal()"
+></app-member-modal>
+
+<app-delete-modal
+  [show]="showDeleteModal"
+  title="Remove Team Member"
+  [message]="'Are you sure you want to remove this member from the team?'"
+  [details]="selectedMember?.name || ''"
+  (confirm)="confirmDeleteMember()"
+  (cancel)="cancelDeleteMember()"
+></app-delete-modal>

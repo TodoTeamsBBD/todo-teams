@@ -87,6 +87,11 @@ button.close {
   border: none;
 }
 
+.delete-details {
+  font-style: italic;
+  font-weight: bold;
+}
+
 ::ng-deep .custom-select-panel {
   background-color: white !important;
   color: black;

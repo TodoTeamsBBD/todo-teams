@@ -1,0 +1,11 @@
+<section class="modal-backdrop" *ngIf="show">
+  <section class="modal">
+    <h2>{{ title }}</h2>
+    <p>{{ message }}</p>
+    <p *ngIf="details" class="delete-details">{{ details }}</p>
+    <section class="modal-actions">
+      <button class="cancel-delete" (click)="handleCancel()">Cancel</button>
+      <button class="delete" (click)="handleConfirm()">Delete</button>
+    </section>
+  </section>
+</section>
