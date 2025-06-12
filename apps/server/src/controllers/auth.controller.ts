@@ -95,7 +95,9 @@ export const signup2FA = async (req: Request, res: Response) => {
 
     await userService.set2FAverified(user.id);
 
-    token = signJwt({ userId: user.id, name: user.username, is2FAverified: true, is2FAverifiedSession: true, isAccessAdmin: false});
+    const isAccessAdmin = await userRoleService.isAccessAdmin(user.id);
+
+    token = signJwt({ userId: user.id, name: user.username, is2FAverified: true, is2FAverifiedSession: true, isAccessAdmin: !!isAccessAdmin});
 
     res.cookie('access_token', token, {
         httpOnly: true,
