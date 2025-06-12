@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/TodoTeamsBBD/todo-teams/issues"
   },
-  "homepage": "https://github.com/TodoTeamsBBD/todo-teams#readme"
+  "homepage": "https://github.com/TodoTeamsBBD/todo-teams#readme",
+  "dependencies": {
+    "express-rate-limit": "^7.5.0"
+  }
 }

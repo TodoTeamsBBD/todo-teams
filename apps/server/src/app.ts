@@ -2,7 +2,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-
+import rateLimit from 'express-rate-limit';
 import userRoutes from './routes/user.routes';
 import teamRoutes from './routes/team.routes';
 import userRoleRoutes from './routes/userRole.routes';
@@ -12,6 +12,20 @@ import authRoutes from './routes/auth.routes';
 
 dotenv.config();
 const app = express();
+
+const apiLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 100,
+  message: {
+    status: 429,
+    message: 'Too many requests, please try again later.',
+  },
+  standardHeaders: true, 
+  legacyHeaders: false, 
+});
+
+app.use(apiLimiter);
+
 
 app.use(cors({
   origin: process.env['CORS_ORIGIN'] || 'http://localhost:4200',
