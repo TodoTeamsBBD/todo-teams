@@ -3,12 +3,12 @@
     <h2>Task Details</h2>
     <p><strong>Title:</strong> {{ task.title }}</p>
     <p><strong>Description:</strong> {{ task.description }}</p>
-    <p><strong>Assigned To:</strong> {{ task.assignedTo }}</p>
-    <p><strong>Created By:</strong> {{ task.createdBy }}</p>
-    <p><strong>Team ID:</strong> {{ task.teamId }}</p>
-    <p><strong>Created At:</strong> {{ task.createdAt | date: 'short' }}</p>
+    <p><strong>Assigned To:</strong> {{ task.assigned_to_name }}</p>
+    <p><strong>Created By:</strong> {{ task.created_by_name }}</p>
+    <p><strong>Team ID:</strong> {{ task.team_id }}</p>
+    <p><strong>Created At:</strong> {{ task.created_at | date: 'short' }}</p>
     <p *ngIf="task.completedAt">
-      <strong>Completed At:</strong> {{ task.completedAt | date: 'short' }}
+      <strong>Completed At:</strong> {{ task.completed_at | date: 'short' }}
     </p>
     <section class="modal-actions">
       <button class="close" (click)="close.emit()">Close</button>

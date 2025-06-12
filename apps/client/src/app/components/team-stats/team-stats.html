@@ -1,0 +1,27 @@
+<div class="report-container">
+  <button mat-raised-button color="primary" (click)="goBack()">
+    Go back to To-Do list
+  </button>
+  <h2 class="report-title">Team Report</h2>
+
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <div *ngIf="stats" class="stats-grid">
+    <div class="stat-card total">
+      <h4>Total Tasks</h4>
+      <p>{{ stats.totalCount }}</p>
+    </div>
+    <div class="stat-card completed">
+      <h4>Completed</h4>
+      <p>{{ stats.completedCount }}</p>
+    </div>
+    <div class="stat-card incomplete">
+      <h4>Incomplete</h4>
+      <p>{{ stats.incompleteCount }}</p>
+    </div>
+    <div class="stat-card avg-time">
+      <h4>Avg Completion Time</h4>
+      <p>{{ stats.avgTimeToComplete | number:'1.1-2' }} days</p>
+    </div>
+  </div>
+</div>

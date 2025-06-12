@@ -62,10 +62,10 @@ export const getStats = async (req: AuthenticatedRequest, res: Response) => {
     return res.status(403).json({ "message": "Access denied: You do not have permission to perform this action." });
   }
 
-  const totalCount = teamService.totalTodos(team.id);
-  const completedCount = teamService.completedCount(team.id);
-  const incompleteCount = teamService.incompleteCount(team.id);
-  const avgTimeToComplete = teamService.avgTimeToComplete(team.id);
+  const totalCount = await teamService.totalTodos(team.id);
+  const completedCount = await teamService.completedCount(team.id);
+  const incompleteCount = await teamService.incompleteCount(team.id);
+  const avgTimeToComplete = await teamService.avgTimeToComplete(team.id);
 
   return res.status(200).json({totalCount, completedCount, incompleteCount, avgTimeToComplete});
 }

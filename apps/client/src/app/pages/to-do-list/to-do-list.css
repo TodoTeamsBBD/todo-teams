@@ -2,9 +2,7 @@
 
 .sidenav-container {
   margin-top: 50px;
-  /* height: 100vh;
-   */
-  height: calc(100vh - 64px);
+  /* height: calc(100vh - 64px); */
 }
 
 .team-sidenav {
@@ -16,7 +14,7 @@
 }
 
 .container {
-  padding: 2rem;
+  padding: 0 2rem;
   text-align: center;
 }
 
@@ -159,3 +157,4 @@ button[disabled] mat-icon {
     padding: 1rem;
   }
 }
+

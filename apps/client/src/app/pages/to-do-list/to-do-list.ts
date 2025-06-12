@@ -19,7 +19,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ToDoService } from './to-do-list.service';
 import { AuthService, UserState } from '../../services/authservice';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UserRoleService } from '../../services/user-role-service';
 import {
   TeamMember,
@@ -74,7 +74,8 @@ export class ToDoList implements OnInit, AfterViewInit {
     private todoService: ToDoService,
     private userRoleService: UserRoleService,
     private authService: AuthService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   tasks: Task[] = [];
@@ -201,7 +202,17 @@ export class ToDoList implements OnInit, AfterViewInit {
   }
 
   showTaskDetails(task: Task): void {
-    this.selectedTask = task;
+    const taskWithNames = {
+      ...task,
+      created_by_name: this.getUserNameById(task.created_by ?? ''),
+      assigned_to_name: this.getUserNameById(
+        typeof task.assigned_to === 'string'
+          ? task.assigned_to
+          : task.assigned_to?.id ?? ''
+      ),
+    };
+
+    this.selectedTask = taskWithNames;
     document.body.classList.add('modal-open');
   }
 
@@ -362,7 +373,6 @@ export class ToDoList implements OnInit, AfterViewInit {
   }
 
   canEditOrDelete(task: Task): boolean {
-
     const role = this.getCurrentUserRole();
     if (role === 'TeamLead') return true;
 
@@ -386,5 +396,13 @@ export class ToDoList implements OnInit, AfterViewInit {
 
   togglePanel(): void {
     this.sideNavOpened = !this.sideNavOpened;
+  }
+
+  showStats() {
+    this.router.navigate(['/team-stats'], {
+      queryParams: {
+        teamId: this.teamId,
+      },
+    });
   }
 }

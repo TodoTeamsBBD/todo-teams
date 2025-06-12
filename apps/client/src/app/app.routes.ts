@@ -8,6 +8,7 @@ import { TwoFactorVerify } from './pages/two-factor-verify/two-factor-verify.js'
 import { authGuard } from './guards/auth-guard.js';
 import { publicGuard } from './guards/public-guard.js';
 import { AccessAdministratorPage } from './pages/access-administrator-page/access-administrator-page.js';
+import {TeamStats} from './components/team-stats/team-stats.js'
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -18,4 +19,5 @@ export const routes: Routes = [
     { path: 'signup-2fa', component: TwoFactorAuthPage, canActivate: [authGuard]},
     { path: 'verify-2fa', component: TwoFactorVerify, canActivate: [authGuard]},
     { path: 'access-admin', component: AccessAdministratorPage, canActivate: [authGuard]},
+    { path: 'team-stats', component: TeamStats, canActivate: [authGuard]},
 ];
