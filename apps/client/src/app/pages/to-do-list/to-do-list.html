@@ -22,7 +22,10 @@
       <button mat-icon-button (click)="togglePanel()" class="menu-btn">
         <mat-icon>menu</mat-icon>
       </button>
+      <span class="toolbar-title">View Team Members</span>
     </mat-toolbar>
+
+
     <section class="container">
       <header>
         <h1>Welcome to Your Team To-Do List</h1>
@@ -37,10 +40,7 @@
             View my tasks
           </mat-checkbox>
 
-          <mat-checkbox
-            [(ngModel)]="showCompletedTasks"
-            (change)="loadTodos()"
-          >
+          <mat-checkbox [(ngModel)]="showCompletedTasks" (change)="loadTodos()">
             View completed tasks
           </mat-checkbox>
         </section>
