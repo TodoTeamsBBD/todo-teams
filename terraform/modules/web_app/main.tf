@@ -48,6 +48,34 @@ resource "aws_s3_bucket_ownership_controls" "angular_app" {
   }
 }
 
+resource "aws_cloudfront_response_headers_policy" "angular_security_headers" {
+  name = "angular-security-headers"
+
+  security_headers_config {
+    content_security_policy {
+      override = true
+      content_security_policy = "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
+    }
+
+    frame_options {
+      override = true
+      frame_option = "DENY"
+    }
+
+    referrer_policy {
+      override = true
+      referrer_policy = "strict-origin-when-cross-origin"
+    }
+
+    strict_transport_security {
+      override = true
+      access_control_max_age_sec = 63072000
+      include_subdomains = true
+      preload = true
+    }
+  }
+}
+
 # CloudFront distribution for S3
 resource "aws_cloudfront_distribution" "angular_distribution" {
   origin {
@@ -79,6 +107,7 @@ resource "aws_cloudfront_distribution" "angular_distribution" {
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = "S3-angular-app"
 
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.angular_security_headers.id
     forwarded_values {
       query_string = false
       cookies {
