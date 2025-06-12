@@ -116,8 +116,8 @@ export const create = async (req: AuthenticatedRequest, res: Response) => {
 
 export const update = async (req: AuthenticatedRequest, res: Response) => {
   const id = Number(req.params['id']);
-  const rawTitle = req.body.title;
-  const rawDescription = req.body.description;
+  const rawTitle = req.body.title || '';
+  const rawDescription = req.body.description || '';
   const assignedTo = req.body.assignedTo;
   const completed = req.body.completed;
 

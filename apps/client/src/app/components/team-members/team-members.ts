@@ -83,18 +83,23 @@ export class TeamMembers {
   }
 
   saveMember(newMember: TeamMember) {
-    if (newMember.userRoleId !== null ){
-      alert("User is already a team member")
-    }
+    // if (newMember.userRoleId !== null ){
+    //   alert("User is already a team member")
+    // }
     this.userRoleService
       .assignUserRole(newMember.id, ROLE_ENUM.TeamMember, this.teamId)
       .subscribe({
-        next: () => {
-          alert('User role assigned as Team Member');
+        next: (res) => {
+          alert('User successfully added to the team.');
           this.members.push(newMember);
         },
         error: (err) => {
-          console.error('Failed to assign role:', err);
+          console.error('Failed to assign role:', err.message);
+          // alert(err.message)
+
+          if (err.status == 403) {
+            alert('User is already in the team');
+          }
         },
       });
 
@@ -106,7 +111,6 @@ export class TeamMembers {
     this.userService.getAvailableUsers().subscribe({
       next: (response) => {
         this.availableMembers = response;
-       
       },
       error: (error) => {
         console.error('Failed to load available team members', error);
@@ -127,7 +131,6 @@ export class TeamMembers {
 
   confirmDeleteMember() {
     if (this.selectedMember && this.selectedMember.userRoleId !== undefined) {
-     
       this.userRoleService
         .removeTeamMember(this.selectedMember.userRoleId)
         .subscribe({
@@ -154,4 +157,9 @@ export class TeamMembers {
     this.showDeleteModal = false;
     document.body.classList.remove('modal-open');
   }
+
+  //   isUserAllowedToManageMembers(): boolean {
+  //   const role = this.getCurrentUserRole();
+  //   return role === 'TeamLead' || role === 'AccessAdministrator';
+  // }
 }
