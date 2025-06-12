@@ -20,13 +20,10 @@ export interface Todo {
 })
 export class ToDoService {
   private baseUrl: string;
-    
-      constructor(
-          private http: HttpClient,
-          private configService: ConfigService,
-        ) {
-          this.baseUrl = this.configService.apiUrl;
-        }
+
+  constructor(private http: HttpClient, private configService: ConfigService) {
+    this.baseUrl = this.configService.apiUrl;
+  }
 
   getTodosForTeam(
     teamId: number,
@@ -41,6 +38,12 @@ export class ToDoService {
 
     return this.http.get<Todo[]>(`${this.baseUrl}/api/todos/team/${teamId}`, {
       params,
+      withCredentials: true,
+    });
+  }
+
+  getTodoById(todoId: number): Observable<Todo> {
+    return this.http.get<Todo>(`${this.baseUrl}/api/todos/${todoId}`, {
       withCredentials: true,
     });
   }
@@ -76,13 +79,7 @@ export class ToDoService {
     );
   }
 
-  // updateTodoStatus(
-  //   id: number,
-  //   payload: { completed: string }
-  // ): Observable<Todo> {
-  //   return this.http.put<Todo>(`${this.baseUrl}/api/todos/${id}`, payload);
-  // }
-    updateTodoStatus(
+  updateTodoStatus(
     id: number,
     payload: { completed: string }
   ): Observable<Todo> {
@@ -90,6 +87,4 @@ export class ToDoService {
       withCredentials: true,
     });
   }
-
-
 }
