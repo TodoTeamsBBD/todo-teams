@@ -13,18 +13,16 @@ import authRoutes from './routes/auth.routes';
 dotenv.config();
 const app = express();
 
-const apiLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 100,
+const writeRateLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 10,
   message: {
     status: 429,
-    message: 'Too many requests, please try again later.',
+    message: 'You thought you were slick? Stop spamming.',
   },
-  standardHeaders: true, 
-  legacyHeaders: false, 
+  standardHeaders: true,
+  legacyHeaders: false,
 });
-
-app.use(apiLimiter);
 
 
 app.use(cors({
@@ -35,6 +33,14 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+
+app.use((req, res, next) => {
+  const method = req.method.toUpperCase();
+  if (method === 'POST' || method === 'PUT' || method === 'DELETE') {
+    return writeRateLimiter(req, res, next);
+  }
+  next();
+});
 
 app.use('/api/users', userRoutes);
 app.use('/api/teams', teamRoutes);
