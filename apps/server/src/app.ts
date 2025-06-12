@@ -2,7 +2,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-
+import rateLimit from 'express-rate-limit';
 import userRoutes from './routes/user.routes';
 import teamRoutes from './routes/team.routes';
 import userRoleRoutes from './routes/userRole.routes';
@@ -13,6 +13,18 @@ import authRoutes from './routes/auth.routes';
 dotenv.config();
 const app = express();
 
+const writeRateLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 10,
+  message: {
+    status: 429,
+    message: 'You thought you were slick? Stop spamming.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+
 app.use(cors({
   origin: process.env['CORS_ORIGIN'] || 'http://localhost:4200',
   credentials: true,
@@ -21,6 +33,14 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+
+app.use((req, res, next) => {
+  const method = req.method.toUpperCase();
+  if (method === 'POST' || method === 'PUT' || method === 'DELETE') {
+    return writeRateLimiter(req, res, next);
+  }
+  next();
+});
 
 app.use('/api/users', userRoutes);
 app.use('/api/teams', teamRoutes);
