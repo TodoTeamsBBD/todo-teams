@@ -22,8 +22,9 @@ export const getTodosOfTeam = (
   } else if (completed === false) {
     where.completed_at = null;
   }
+  
 
-  return prisma.todos.findMany({ where });
+  return prisma.todos.findMany({ where , orderBy: { created_at: "desc" },});
 };
 
 export const createTodo = (

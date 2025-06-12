@@ -49,7 +49,7 @@ export interface Enable2FAResponse {
 }
 
 export interface UserState {
-  userId?: string;
+  userId: string;
   verified2FA?: boolean;
   verified2FAsession?: boolean;
   isAccessAdmin?: boolean;

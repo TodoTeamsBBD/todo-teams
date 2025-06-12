@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpParams,
+  HttpErrorResponse,
+} from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ConfigService } from './config';
@@ -67,34 +71,42 @@ export interface PaginatedTeams {
   totalPages: number;
 }
 
+export interface TeamStats {
+  totalCount: number;
+  completedCount: number;
+  incompleteCount: number;
+  avgTimeToComplete: number;
+}
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TeamService {
+
   private apiUrl: string; // Update with your API URL
 
   constructor(
-      private http: HttpClient,
-      private configService: ConfigService,
-      private snackBar: MatSnackBar
-    ) {
-      this.apiUrl = this.configService.apiUrl;
-    }
+    private http: HttpClient,
+    private configService: ConfigService,
+    private snackBar: MatSnackBar
+  ) {
+    this.apiUrl = this.configService.apiUrl;
+  }
 
   getUserTeams(): Observable<UserTeam[]> {
-    return this.http.get<UserTeam[]>(`${this.apiUrl}/api/teams/user`, {
-      withCredentials: true
-    }).pipe(
-      catchError(this.handleError)
-    );
+    return this.http
+      .get<UserTeam[]>(`${this.apiUrl}/api/teams/user`, {
+        withCredentials: true,
+      })
+      .pipe(catchError(this.handleError));
   }
 
   createTeam(request: CreateTeamRequest): Observable<CreateTeamResponse> {
-    return this.http.post<CreateTeamResponse>(`${this.apiUrl}/api/teams`, request, {
-      withCredentials: true
-    }).pipe(
-      catchError(this.handleError)
-    );
+    return this.http
+      .post<CreateTeamResponse>(`${this.apiUrl}/api/teams`, request, {
+        withCredentials: true,
+      })
+      .pipe(catchError(this.handleError));
   }
 
   getTeams(page: number, pageSize: number): Observable<PaginatedTeams> {
@@ -102,30 +114,30 @@ export class TeamService {
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
 
-    return this.http.get<PaginatedTeams>(`${this.apiUrl}/api/teams`, {
-      params,
-      withCredentials: true
-    }).pipe(
-      catchError(this.handleError)
-    );
+    return this.http
+      .get<PaginatedTeams>(`${this.apiUrl}/api/teams`, {
+        params,
+        withCredentials: true,
+      })
+      .pipe(catchError(this.handleError));
   }
 
- getTeamMembers(teamId: number): Observable<TeamMember[]> {
-    return this.http.get<TeamMember[]>(`${this.apiUrl}/api/user-roles/team/${teamId}`, {
-      withCredentials: true
-    }).pipe(
-      catchError(this.handleError)
-    );
+  getTeamMembers(teamId: number): Observable<TeamMember[]> {
+    return this.http
+      .get<TeamMember[]>(`${this.apiUrl}/api/user-roles/team/${teamId}`, {
+        withCredentials: true,
+      })
+      .pipe(catchError(this.handleError));
   }
 
   updateUserRole(userRoleId: number, newRoleId: number): Observable<any> {
-    return this.http.put<any>(
-      `${this.apiUrl}/api/user-roles/${userRoleId}`,
-      { role: newRoleId },
-      { withCredentials: true }
-    ).pipe(
-      catchError(this.handleError)
-    );
+    return this.http
+      .put<any>(
+        `${this.apiUrl}/api/user-roles/${userRoleId}`,
+        { role: newRoleId },
+        { withCredentials: true }
+      )
+      .pipe(catchError(this.handleError));
   }
 
   private handleError = (error: HttpErrorResponse) => {
@@ -136,16 +148,23 @@ export class TeamService {
       errorMessage = error.error.message;
     } else {
       // Server-side error
-      errorMessage = typeof error.error === 'string' ? error.error : error.error.message;
+      errorMessage =
+        typeof error.error === 'string' ? error.error : error.error.message;
     }
 
     this.snackBar.open(errorMessage, 'Close', {
       duration: 5000,
       verticalPosition: 'top',
-      panelClass: ['error-snackbar']
+      panelClass: ['error-snackbar'],
     });
 
     return throwError(() => errorMessage);
-  }
+  };
 
+  getStats(teamId: number): Observable<TeamStats> {
+    return this.http.get<TeamStats>(
+      `${this.apiUrl}/api/teams/stats/${teamId}`,
+      { withCredentials: true }
+    );
+  }
 }

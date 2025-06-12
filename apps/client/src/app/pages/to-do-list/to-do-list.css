@@ -1,6 +1,6 @@
 @import "../../styles/shared/_common.css";
 
-.container {
+.container { 
   /* margin-top: 250px; */
   padding: 2rem;
   text-align: center;
@@ -128,7 +128,7 @@ button[disabled] mat-icon {
   padding: 0;
 }
 
-.completed {
+.completed-task {
   text-decoration: line-through;
   opacity: 0.6;
 }
