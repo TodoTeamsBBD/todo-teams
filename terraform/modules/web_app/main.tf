@@ -54,7 +54,7 @@ resource "aws_cloudfront_response_headers_policy" "angular_security_headers" {
   security_headers_config {
     content_security_policy {
       override = true
-      content_security_policy = "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
+      content_security_policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://team7-todo.xyz; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
     }
 
     frame_options {
