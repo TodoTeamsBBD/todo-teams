@@ -42,8 +42,6 @@ export class CreateTeamForm {
 
     this.teamService.createTeam(request).subscribe({
       next: (response) => {
-        console.log('Team created successfully:', response);
-        // Close dialog and return the created team
         this.dialogRef.close(response.team);
       },
       error: (error) => {

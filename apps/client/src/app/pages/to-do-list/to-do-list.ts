@@ -115,9 +115,6 @@ export class ToDoList implements OnInit, AfterViewInit {
     this.authService.getCurrentUserState().subscribe({
       next: (user) => {
         this.currentUser = user;
-        console.log('curret user');
-        console.log(this.currentUser);
-
         this.route.queryParams.subscribe((params) => {
           const param = params['teamId'];
           this.teamId = param;
@@ -181,7 +178,6 @@ export class ToDoList implements OnInit, AfterViewInit {
     this.userRoleService.getUsersByTeam(this.teamId).subscribe({
       next: (response) => {
         this.teamMembers = response.members;
-        console.log(this.teamMembers);
       },
       error: (error) => {
         console.error('Failed to load team members', error);
@@ -366,8 +362,6 @@ export class ToDoList implements OnInit, AfterViewInit {
   }
 
   canEditOrDelete(task: Task): boolean {
-    // console.log("task")
-    // console.log(task)
 
     const role = this.getCurrentUserRole();
     if (role === 'TeamLead') return true;
@@ -381,7 +375,6 @@ export class ToDoList implements OnInit, AfterViewInit {
     }
 
     let curr = this.currentUser.userId;
-    console.log(curr);
 
     const currentMember = this.teamMembers.find((m) => m.id === curr);
     return currentMember?.role === 'TeamLead';

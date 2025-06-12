@@ -9,8 +9,6 @@ export const publicGuard: CanActivateFn = (route, state) => {
 
   return authService.getCurrentUserState().pipe(
     map((response: any) => {
-      console.log('Public guard - User details:', response);
-
       const isAuthenticated = response.userId !== undefined;
       const is2FAVerified = response.verified2FA === true;
       const is2FAVerifiedSession = response.verified2FAsession === true;
@@ -27,12 +25,9 @@ export const publicGuard: CanActivateFn = (route, state) => {
         return false;
       }
 
-      // Allow access to public routes (login/signup)
       return true;
     }),
     catchError((error) => {
-      console.log('Public guard - Auth check failed:', error);
-      // If error, user is not authenticated, allow access to public routes
       return of(true);
     })
   );

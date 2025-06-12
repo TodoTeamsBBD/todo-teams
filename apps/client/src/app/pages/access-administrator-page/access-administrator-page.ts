@@ -46,11 +46,10 @@ export class AccessAdministratorPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loadTeams(this.currentPage + 1, this.pageSize); // Backend expects 1-based pages
+    this.loadTeams(this.currentPage + 1, this.pageSize);
   }
 
   loadTeams(page: number, pageSize: number) {
-  console.log(`Loading teams - Page: ${page}, PageSize: ${pageSize}`);
 
   this.teamService.getTeams(page, pageSize).subscribe({
     next: (result: PaginatedTeams) => {

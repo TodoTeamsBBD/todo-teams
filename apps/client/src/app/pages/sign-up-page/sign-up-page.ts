@@ -52,7 +52,6 @@ export class SignUpPage {
 
     this.authService.signup(signupData).subscribe({
       next: (response) => {
-        console.log('Signup successful:', response);
         this.router.navigate(['/signup-2fa']);
       },
       error: (errorMessage: string) => {

@@ -32,7 +32,6 @@ export class TwoFactorAuthPage implements OnInit {
 
     this.authService.fetchSignupQRCode().subscribe({
       next: (response) => {
-        console.log('QR Code fetched successfully:', response);
         this.qrCodeUrl = response.qrCodeUrl;
         this.isLoadingQR = false;
       },
@@ -64,7 +63,6 @@ export class TwoFactorAuthPage implements OnInit {
 
     this.authService.enable2FA(request).subscribe({
       next: () => {
-        console.log('2FA verification successful');
         this.isVerifying = false;
         this.currentStep = 2;
 

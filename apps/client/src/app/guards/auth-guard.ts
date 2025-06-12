@@ -9,35 +9,28 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   return authService.getCurrentUserState().pipe(
     map((response: any) => {
-      console.log('User details response:', response);
 
-      // Check authentication status
       const isAuthenticated = response.userId !== undefined;
       const is2FAVerified = response.verified2FA === true;
       const is2FAVerifiedSession = response.verified2FAsession === true;
       const isAccessAdmin = response.isAccessAdmin === true;
 
-      // If both 2FA flags are true, user is fully authenticated
       if (isAuthenticated && is2FAVerified && is2FAVerifiedSession) {
-        // Allow access to protected routes, redirect to dashboard if trying to access auth pages
 
-        // 🚫 Admin trying to access user dashboard
         if (isAccessAdmin && state.url.startsWith('/dashboard')) {
           router.navigate(['/access-admin']);
           return false;
         }
 
-        // 🚫 User trying to access admin page
         if (!isAccessAdmin && state.url.startsWith('/admin')) {
           router.navigate(['/dashboard']);
           return false;
         }
 
-        // ✅ Redirect from login/signup pages if already logged in
         if (
           state.url === '/login' ||
           state.url === '/signup' ||
-          state.url === '/signup-2fa' || 
+          state.url === '/signup-2fa' ||
           state.url === '/verify-2fa'
         ) {
           router.navigate([isAccessAdmin ? '/access-admin' : '/dashboard']);
@@ -75,9 +68,7 @@ export const authGuard: CanActivateFn = (route, state) => {
       return true;
     }),
     catchError((error) => {
-      console.log('Auth check failed:', error);
 
-      // If error (like 401/403), user is not authenticated
       if (state.url !== '/login' && state.url !== '/signup') {
         router.navigate(['/login']);
         return of(false);

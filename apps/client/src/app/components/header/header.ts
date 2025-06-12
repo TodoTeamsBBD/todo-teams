@@ -32,8 +32,6 @@ export class Header {
 
     this.authService.logout().subscribe({
       next: (response) => {
-        console.log('Logout successful:', response);
-        // Redirect to login page after successful logout
         this.router.navigate(['/login']);
         this.isLoggingOut = false;
       },

@@ -28,7 +28,6 @@ export class TwoFactorVerify{
 
     this.authService.verify2FA(request).subscribe({
       next: () => {
-        console.log('2FA verification successful');
         this.isVerifying = false;
 
         setTimeout(() => {
