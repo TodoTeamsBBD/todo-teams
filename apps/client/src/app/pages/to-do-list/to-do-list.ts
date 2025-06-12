@@ -79,7 +79,7 @@ export class ToDoList implements OnInit, AfterViewInit {
 
   tasks: Task[] = [];
 
-  sideNavOpened: boolean = true;
+  sideNavOpened: boolean = false;
   showMyTasks: boolean = false;
   showCompletedTasks: boolean = false;
   filteredTasks: Task[] = [];
