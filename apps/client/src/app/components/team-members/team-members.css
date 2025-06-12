@@ -1,13 +1,16 @@
 .header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
 .actions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .add-button {
@@ -17,14 +20,19 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  flex: 1 1 auto;
+  min-width: 120px;
 }
 
 .search-input {
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
+  flex: 1 1 auto;
+  min-width: 120px;
 }
 
+/* Member List */
 .member-list {
   display: flex;
   flex-direction: column;
@@ -33,13 +41,18 @@
 
 .member {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
   align-items: center;
   gap: 1rem;
   padding: 0.75rem;
   border: 1px solid #eee;
   border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
 }
 
+/* Avatar and Info */
 .avatar {
   width: 40px;
   height: 40px;
@@ -53,6 +66,13 @@
   font-size: 1rem;
 }
 
+.member-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1 1 auto;
+}
+
 .info .name {
   font-weight: 500;
 }
@@ -62,16 +82,42 @@
   color: #777;
 }
 
-.member-info {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1.5rem;
-  gap: 1rem;
-
-}
-
+/* Member Actions */
 .member-actions {
   display: flex;
   align-items: center;
-  margin-left: auto;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .add-button,
+  .search-input {
+    width: 100%;
+  }
+
+  .member {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .member-info {
+    justify-content: flex-start;
+  }
+
+  .member-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
