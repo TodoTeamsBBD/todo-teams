@@ -107,6 +107,7 @@ resource "aws_cloudfront_distribution" "angular_distribution" {
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = "S3-angular-app"
 
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.angular_security_headers.id
     forwarded_values {
       query_string = false
       cookies {
