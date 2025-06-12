@@ -35,8 +35,8 @@
         [disabled]="!canEditAssignedTo"
         required
       >
-        <mat-option *ngFor="let member of teamMembers" [value]="member" >
-          {{ member }}
+        <mat-option *ngFor="let member of teamMembers" [value]="member">
+          {{ member.name }}
         </mat-option>
       </mat-select>
     </mat-form-field>

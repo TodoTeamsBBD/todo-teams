@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { TeamMember, MemberRole } from '../team-members/team-members';
+import { Task } from '../../pages/to-do-list/to-do-list';
 
 @Component({
   selector: 'app-task-modal',
@@ -23,9 +24,10 @@ import { TeamMember, MemberRole } from '../team-members/team-members';
 export class TaskModal {
   @Input() show = false;
   @Input() isEditMode = false;
-  @Input() task = { id: 0, title: '', description: '', assigned_to: '' };
-  @Input() teamMembers: string[] = [];
-  @Input() canEditAssignedTo: boolean = !this.isEditMode;
+  @Input() task: Task = { id: 0, title: '', description: '' };
+  // @Input() teamMembers: string[] = [];
+  @Input() teamMembers: TeamMember[] = [];
+  @Input() canEditAssignedTo: boolean = true;
 //   get canEditAssignedTo(): boolean {
 //   return !this.isEditMode;
 // }

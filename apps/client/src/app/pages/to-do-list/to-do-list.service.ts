@@ -76,10 +76,20 @@ export class ToDoService {
     );
   }
 
-  updateTodoStatus(
+  // updateTodoStatus(
+  //   id: number,
+  //   payload: { completed: string }
+  // ): Observable<Todo> {
+  //   return this.http.put<Todo>(`${this.baseUrl}/api/todos/${id}`, payload);
+  // }
+    updateTodoStatus(
     id: number,
     payload: { completed: string }
   ): Observable<Todo> {
-    return this.http.put<Todo>(`${this.baseUrl}/api/todos/${id}`, payload);
+    return this.http.put<Todo>(`${this.baseUrl}/api/todos/${id}`, payload, {
+      withCredentials: true,
+    });
   }
+
+
 }

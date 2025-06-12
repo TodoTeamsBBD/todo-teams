@@ -2,6 +2,7 @@
   <h3>Team Members</h3>
   <section class="actions">
     <button class="add-button" (click)="openAddMemberModal()">
+    <!-- <button class="add-button" (click)="openAddMemberModal()" *ngIf="isUserAllowedToManageMembers()"> -->
       + Add member
     </button>
     <input
@@ -24,6 +25,7 @@
     </section>
 
     <section class="member-actions">
+    <!-- <section class="member-actions" *ngIf="isUserAllowedToManageMembers()"> -->
       <button
         mat-icon-button
         (click)="openDeleteMemberModal(i)"

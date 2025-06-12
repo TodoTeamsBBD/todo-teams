@@ -39,7 +39,7 @@
 
           <mat-checkbox
             [(ngModel)]="showCompletedTasks"
-            (change)="applyFilters()"
+            (change)="loadTodos()"
           >
             View completed tasks
           </mat-checkbox>
@@ -61,7 +61,7 @@
         <ng-container matColumnDef="assigned_to">
           <th mat-header-cell *matHeaderCellDef>Assigned To</th>
           <td mat-cell *matCellDef="let task">
-            {{ getUserNameById(task.assigned_to)}}
+            {{ getUserNameById(task.assigned_to.id)}}
           </td>
         </ng-container>
 
@@ -106,7 +106,11 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr
+          mat-row
+          *matRowDef="let task; columns: displayedColumns;"
+          [class.completed-task]="task.completed_at"
+        ></tr>
       </table>
 
       <section *ngIf="tasks && (tasks.length == 0) && !loadError">
@@ -148,7 +152,7 @@
   [show]="showDeleteModal"
   title="Confirm Delete"
   [message]="'Are you sure you want to delete this task?'"
-  [details]="taskToDelete ? '\'' + taskToDelete.title + '\' assigned to ' + getUserNameById(taskToDelete.assigned_to) : ''"
+  [details]="taskToDelete ? '\'' + taskToDelete.title + '\' assigned to ' + getUserNameById(taskToDelete.assigned_to.id) : ''"
   (confirm)="confirmDelete()"
   (cancel)="cancelDelete()"
 ></app-delete-modal>

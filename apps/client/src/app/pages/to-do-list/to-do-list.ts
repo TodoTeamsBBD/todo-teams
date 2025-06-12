@@ -17,7 +17,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { ToDoService, Todo } from './to-do-list.service';
+import { ToDoService } from './to-do-list.service';
 import { AuthService, UserState } from '../../services/authservice';
 import { ActivatedRoute } from '@angular/router';
 import { UserRoleService } from '../../services/user-role-service';
@@ -26,22 +26,21 @@ import {
   MemberRole,
 } from '../../components/team-members/team-members';
 
-interface Task {
+export interface Task {
   id: number;
   title: string;
   description?: string;
   created_by?: string;
-  assigned_to: string;
+  assigned_to?: TeamMember;
   team_id?: number;
   created_at?: Date;
   completed_at?: Date | null;
-  
 }
 
 export interface CreateTodoRequest {
   title: string;
   description: string;
-  assignedTo: string;
+  assignedTo?: TeamMember;
   teamId: number;
 }
 
@@ -78,14 +77,7 @@ export class ToDoList implements OnInit, AfterViewInit {
     private route: ActivatedRoute
   ) {}
 
-  tasks: Todo[] = [];
-
-  taskForm = {
-    id: 0, 
-    title: '',
-    description: '',
-    assigned_to: '',
-  };
+  tasks: Task[] = [];
 
   sideNavOpened: boolean = true;
   showMyTasks: boolean = false;
@@ -103,6 +95,12 @@ export class ToDoList implements OnInit, AfterViewInit {
   loadError: boolean = false;
   teamMembers: TeamMember[] = [];
 
+  taskForm: Task = {
+    id: 0,
+    title: '',
+    description: '',
+  };
+
   displayedColumns: string[] = [
     'title',
     'assigned_to',
@@ -117,14 +115,17 @@ export class ToDoList implements OnInit, AfterViewInit {
     this.authService.getCurrentUserState().subscribe({
       next: (user) => {
         this.currentUser = user;
+        console.log('curret user');
+        console.log(this.currentUser);
 
         this.route.queryParams.subscribe((params) => {
           const param = params['teamId'];
           this.teamId = param;
         });
 
-        this.loadTodos();
         this.loadTeamMembers();
+
+        this.loadTodos();
       },
       error: (err) => {
         console.error('Failed to fetch current user:', err);
@@ -136,8 +137,8 @@ export class ToDoList implements OnInit, AfterViewInit {
     this.pagedTasks.paginator = this.paginator;
   }
 
-  get teamMemberNames(): string[] {
-    return this.teamMembers.map((member) => member.name);
+  get teamMemberNames(): TeamMember[] {
+    return this.teamMembers;
   }
 
   loadTodos(): void {
@@ -154,8 +155,13 @@ export class ToDoList implements OnInit, AfterViewInit {
       .getTodosForTeam(teamId, usersToDos, completedToDos)
       .subscribe({
         next: (data) => {
-          this.tasks = data;
-          
+          this.tasks = data.map((todo) => ({
+            ...todo,
+            assigned_to: this.teamMembers.find(
+              (member) => member.id === todo.assigned_to
+            ),
+          }));
+
           this.loadError = false;
           this.applyFilters();
         },
@@ -175,7 +181,7 @@ export class ToDoList implements OnInit, AfterViewInit {
     this.userRoleService.getUsersByTeam(this.teamId).subscribe({
       next: (response) => {
         this.teamMembers = response.members;
-      
+        console.log(this.teamMembers);
       },
       error: (error) => {
         console.error('Failed to load team members', error);
@@ -186,8 +192,11 @@ export class ToDoList implements OnInit, AfterViewInit {
   applyFilters(): void {
     this.filteredTasks = this.tasks.filter((task) => {
       const matchesUser =
-        !this.showMyTasks || task.assigned_to === this.currentUser.userId;
-      const matchesCompleted = !this.showCompletedTasks || this.completed;
+        !this.showMyTasks || task.assigned_to?.id === this.currentUser.userId;
+
+      const matchesCompleted = this.showCompletedTasks
+        ? task.completed_at !== null
+        : task.completed_at === null;
 
       return matchesUser && matchesCompleted;
     });
@@ -206,71 +215,72 @@ export class ToDoList implements OnInit, AfterViewInit {
   }
 
   createTask(): void {
-    this.taskForm = { id: 0,  title: '', description: '', assigned_to: '' };
+    this.taskForm = {
+      id: 0,
+      title: '',
+      description: '',
+      assigned_to: this.teamMembers.find(
+        (member) => member.id === this.currentUser.userId
+      ),
+    };
     this.isEditMode = false;
     this.editIndex = null;
     this.showTaskModal = true;
     document.body.classList.add('modal-open');
   }
 
-
   editTask(index: number): void {
-  const { id, title, description = '', assigned_to } = this.tasks[index];
-  this.taskForm = { id, title, description, assigned_to: this.getUserNameById(assigned_to) }; 
-  this.isEditMode = true;
-  this.editIndex = index;
-  this.showTaskModal = true;
-  document.body.classList.add('modal-open');
-
-}
-
+    const { id, title, description = '', assigned_to } = this.tasks[index];
+    this.taskForm = { id, title, description, assigned_to: assigned_to };
+    this.isEditMode = true;
+    this.editIndex = index;
+    this.showTaskModal = true;
+    document.body.classList.add('modal-open');
+  }
 
   submitTask(task: any): void {
-
     const newTodoRequestBody = {
       title: task.title,
       description: task.description,
-      assignedTo: this.getUserIdByName(task.assigned_to),
+      assignedTo: task.assigned_to.id,
       teamId: this.teamId,
     };
 
     if (this.isEditMode && this.editIndex !== null) {
-  
-
       this.todoService
         .updateTodo(task.id, {
           title: task.title,
           description: task.description,
-          assignedTo: this.getUserIdByName(task.assigned_to),
-
+          assignedTo: task.assigned_to.id,
         })
         .subscribe({
           next: (updatedTodo) => {
             alert(`Todo updated.`);
-      // this.tasks[this.editIndex] = {
-      //   ...this.tasks[this.editIndex],
-      //   ...task,
-      // };
+            // this.tasks[this.editIndex] = {
+            //   ...this.tasks[this.editIndex],
+            //   ...task,
+            // };
 
-          this.applyFilters();
-          this.closeModal();
-        },
-        error: (err) => {
-          console.error('Update failed:', err);
-        },
-      });
+            this.loadTodos();
+            this.closeModal();
+          },
+          error: (err) => {
+            console.error('Update failed:', err);
+          },
+        });
     } else {
       this.todoService.createTodo(newTodoRequestBody).subscribe({
         next: (createdTodo) => {
           this.tasks.push({
             ...task,
             created_by: this.currentUser.userId,
-            assigned_to: this.getUserIdByName(task.assigned_to),
+            assigned_to: task.assigned_to.id,
+
             team_id: this.teamId,
             created_at: new Date(),
             completed_at: null,
           });
-          this.applyFilters();
+          this.loadTodos();
           this.closeModal();
         },
         error: (err) => {
@@ -287,7 +297,8 @@ export class ToDoList implements OnInit, AfterViewInit {
     return (member as any).id;
   }
 
-  getUserNameById(userId: string): string {
+  getUserNameById(user: string | TeamMember): string {
+    const userId = typeof user === 'string' ? user : user.id;
     const member = this.teamMembers.find((m) => m.id === userId);
     return member ? member.name : 'Unknown';
   }
@@ -295,7 +306,7 @@ export class ToDoList implements OnInit, AfterViewInit {
   closeModal(): void {
     this.showTaskModal = false;
     this.editIndex = null;
-    this.taskForm = { id: 0,  title: '', description: '', assigned_to: '' };
+    this.taskForm = { id: 0, title: '' };
     document.body.classList.remove('modal-open');
   }
 
@@ -333,13 +344,8 @@ export class ToDoList implements OnInit, AfterViewInit {
     document.body.classList.remove('modal-open');
   }
 
-
-  //  toggleCompletion(index: number) {
-  //   this.completed = !this.completed
-  // }
-
   toggleCompletion(task: Task): void {
-    const completed = task.completed_at ? 'false' : 'true'; 
+    const completed = task.completed_at ? 'true' : 'false';
 
     this.todoService.updateTodoStatus(task.id, { completed }).subscribe({
       next: (updatedTask) => {
@@ -360,16 +366,24 @@ export class ToDoList implements OnInit, AfterViewInit {
   }
 
   canEditOrDelete(task: Task): boolean {
+    // console.log("task")
+    // console.log(task)
+
     const role = this.getCurrentUserRole();
     if (role === 'TeamLead') return true;
 
-    return task.assigned_to === this.currentUser.userId;
+    return task.assigned_to?.id === this.currentUser.userId;
   }
 
   isCurrentUserTeamLead(): boolean {
-    let curr = this.currentUser.userId;
+    if (!this.currentUser) {
+      return false;
+    }
 
-    const currentMember = this.teamMembers.find((m) => m.name === curr);
+    let curr = this.currentUser.userId;
+    console.log(curr);
+
+    const currentMember = this.teamMembers.find((m) => m.id === curr);
     return currentMember?.role === 'TeamLead';
   }
 
