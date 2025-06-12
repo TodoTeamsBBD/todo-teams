@@ -46,9 +46,6 @@ export class LoginPage {
 
     this.authService.login(loginRequest).subscribe({
       next: (response) => {
-        console.log('Login successful:', response);
-
-        // After successful login, check the user's current state
         this.checkUserStateAndNavigate();
       },
       error: (error) => {
@@ -62,8 +59,6 @@ export class LoginPage {
   private checkUserStateAndNavigate() {
       this.authService.getCurrentUserState().subscribe({
       next: (userState) => {
-        console.log('User state after login:', userState);
-
         const { userId, verified2FA, verified2FAsession } = userState;
 
         if (userId && verified2FA && verified2FAsession) {

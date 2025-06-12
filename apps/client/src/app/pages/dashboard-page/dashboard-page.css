@@ -98,3 +98,10 @@ button[mat-fab] {
   border: none;               /* <-- removes border */
   outline: none;
 }
+
+.no-teams {
+  text-align: center;
+  margin-top: 2rem;
+  color: #888;
+  font-size: 1.2rem;
+}

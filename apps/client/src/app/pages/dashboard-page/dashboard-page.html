@@ -1,24 +1,48 @@
 <div class="team-list">
   <h1>Your teams</h1>
-  <mat-list>
-      <ng-container *ngFor="let item of items; let last = last">
-        <mat-list-item (click)="onItemClick(item)" class="team-item">
-          <div class="list-item-wrapper">
-            <div class="team-id">{{item.id}}</div>
-            <div class="team-info">
-              <div class="team-name">{{ item.name }}</div>
-              <div class="team-description">{{ item.description }}</div>
-            </div>
-            <div class="team-role">{{ item.role }}</div>
+
+  <div *ngIf="isLoading">Loading teams...</div>
+
+  <div *ngIf="!isLoading && errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && items.length === 0" class="no-teams">
+    <svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(100, 60)" fill="#94a3b8">
+        <circle cx="-20" cy="-15" r="8"/>
+        <circle cx="0" cy="-15" r="8"/>
+        <circle cx="20" cy="-15" r="8"/>
+        <rect x="-28" y="-5" width="16" height="20" rx="8"/>
+        <rect x="-8" y="-5" width="16" height="20" rx="8"/>
+        <rect x="12" y="-5" width="16" height="20" rx="8"/>
+      </g>
+      <text x="100" y="110" text-anchor="middle" fill="#64748b" font-family="sans-serif" font-size="16" font-weight="500">
+        No teams found
+      </text>
+    </svg>
+  </div>
+
+  <!-- Show team list -->
+  <mat-list *ngIf="!isLoading && items.length > 0">
+    <ng-container *ngFor="let item of items; let last = last">
+      <mat-list-item (click)="onItemClick(item)" class="team-item">
+        <div class="list-item-wrapper">
+          <div class="team-id">{{item.id}}</div>
+          <div class="team-info">
+            <div class="team-name">{{ item.name }}</div>
+            <div class="team-description">{{ item.description }}</div>
           </div>
-        </mat-list-item>
-        <mat-divider *ngIf="!last"></mat-divider>
+          <div class="team-role">{{ item.role }}</div>
+        </div>
+      </mat-list-item>
+      <mat-divider *ngIf="!last"></mat-divider>
     </ng-container>
   </mat-list>
 </div>
+
 <div class="fab-container">
   <button mat-fab color="primary" (click)="addTeam()">
-    <mat-icon >add</mat-icon>
+    <mat-icon>add</mat-icon>
   </button>
 </div>
-

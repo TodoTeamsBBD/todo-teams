@@ -64,9 +64,6 @@ export class DashboardPage implements OnInit {
   }
 
   onItemClick(item: TeamItem) {
-    console.log('Selected team:', item);
-    // Add navigation logic here if needed
-    // this.router.navigate(['/team', item.id]);
     this.router.navigate(['/to-do-list'], {
       queryParams: {
         teamId: item.id,
@@ -80,11 +77,8 @@ export class DashboardPage implements OnInit {
       autoFocus: true
     });
 
-    // Refresh the teams list when a new team is created
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        console.log('New team created:', result);
-        // Reload the teams list to include the new team
         this.loadUserTeams();
       }
     });
