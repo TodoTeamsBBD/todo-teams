@@ -35,7 +35,7 @@ export interface UserTeam {
   role_id: number;
   teams: Team;
   roles: Role;
-  user: User; // 👈 include this
+  user: User;
 }
 
 export interface TeamMember {
