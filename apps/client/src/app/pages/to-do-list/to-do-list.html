@@ -25,7 +25,6 @@
       <span class="toolbar-title">View Team Members</span>
     </mat-toolbar>
 
-
     <section class="container">
       <header>
         <h1>Welcome to Your Team To-Do List</h1>
@@ -35,6 +34,8 @@
           <button mat-raised-button color="primary" (click)="createTask()">
             Create New Task
           </button>
+
+          <button mat-raised-button color="primary" (click)="showStats()">View team report</button>
 
           <mat-checkbox [(ngModel)]="showMyTasks" (change)="loadTodos()">
             View my tasks
